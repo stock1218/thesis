@@ -1,0 +1,71 @@
+This is BibTeX, Version 0.99d
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: thesis.aux
+Reallocating 'name_of_file' (item size: 1) to 40 items.
+A level-1 auxiliary file: ./Acknowledgements/acknowledgements.aux
+Reallocating 'name_of_file' (item size: 1) to 24 items.
+A level-1 auxiliary file: ./Abstract/abstract.aux
+Reallocating 'name_of_file' (item size: 1) to 28 items.
+A level-1 auxiliary file: ./Chapter1/introduction.aux
+Reallocating 'name_of_file' (item size: 1) to 23 items.
+A level-1 auxiliary file: ./Chapter3/related.aux
+Reallocating 'name_of_file' (item size: 1) to 24 items.
+A level-1 auxiliary file: ./Chapter4/overview.aux
+Reallocating 'name_of_file' (item size: 1) to 25 items.
+The style file: ./Bibliography/IEEEtranS.bst
+Reallocating 'name_of_file' (item size: 1) to 26 items.
+Reallocating 'name_of_file' (item size: 1) to 25 items.
+A level-1 auxiliary file: ./Appendix/appendix1.aux
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Reallocating 'wiz_functions' (item size: 4) to 6000 items.
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Database file #1: ./Bibliography/References.bib
+-- IEEEtranS.bst version 1.13 (2008/09/30) by Michael Shell.
+-- http://www.michaelshell.org/tex/ieeetran/bibtex/
+-- See the "IEEEtran_bst_HOWTO.pdf" manual for usage information.
+** Sorting version - not for normal IEEE work.
+
+Done.
+You've used 2 entries,
+            4550 wiz_defined-function locations,
+            917 strings with 8630 characters,
+and the built_in function-call counts, 2234 in all, are:
+= -- 196
+> -- 60
+< -- 20
++ -- 34
+- -- 14
+* -- 131
+:= -- 344
+add.period$ -- 4
+call.type$ -- 2
+change.case$ -- 13
+chr.to.int$ -- 42
+cite$ -- 2
+duplicate$ -- 134
+empty$ -- 139
+format.name$ -- 16
+if$ -- 487
+int.to.chr$ -- 0
+int.to.str$ -- 2
+missing$ -- 21
+newline$ -- 29
+num.names$ -- 4
+pop$ -- 48
+preamble$ -- 1
+purify$ -- 11
+quote$ -- 2
+skip$ -- 158
+stack$ -- 0
+substring$ -- 111
+swap$ -- 118
+text.length$ -- 6
+text.prefix$ -- 0
+top$ -- 6
+type$ -- 22
+warning$ -- 0
+while$ -- 10
+width$ -- 3
+write$ -- 44
