@@ -1,3 +1,7 @@
 \abstract
 
-Write your abstract here.  You should not include references or mathematical notation.
+The first major integer safety issue occurred in 1975 with the DATE75 bug, where dates past January 4th 1975 could not be represented using a 12 bit integer. Almost 50 years later, integer safety bugs are still an issue programmers must consider when writing code. This is especially important for safety critical systems, which are commonly written in C. C as a programming language is also quite old and is known to be difficult to write secure code with. However, the C language standard recently introduced a set of checked arithmetic macros in an attempt to help programmers write more secure C.
+
+This thesis is an exploration into the feasibility of using compiler-assisted techniques to modernize safety critical systems so that they use checked arithmetic. We first begin with a definition of integer safety followed by a survey into techniques that have been used to address this issue. We then propose a design for a compiler-assisted transpiler that will rewrite arithmetic statements to use checked arithmetic macros. This is followed by implementation details as it relates to writing a Clang Tidy check. This thesis then ends with an evaluation of the check followed by concluding remarks.
+
+TODO evaluation

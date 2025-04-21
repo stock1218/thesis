@@ -1,4 +1,5 @@
 \documentclass[MS]{inithesis}
+\usepackage{booktabs}
 %\documentclass[economy,twoside,bind]{inithesis}
 % Use the second for a single-spaced copy suitable for duplex printing
 % and binding.
@@ -54,18 +55,18 @@
 %-----------------------------------------------------------------------------%
 % PREAMBLE 
 %-----------------------------------------------------------------------------%
-\author{[John S. Samuels, II]}% First Name, Middle Initial, Last Name
-\title{[Your Title Here]}
+\author{John S. Samuels, II}% First Name, Middle Initial, Last Name
+\title{Code Modernization Techniques Using Clang-Tidy for C23 Checked Arithmetic}
 %\supervisor{Dr. Nicolas Christin}
 %\advisor{Dr. Nicolas Christin}
 \department{Information Networking Institute} 
-\program{[Program Name]}% MSISTM, MSIN or MIST-X
+\program{Master's in Information Security}% MSISTM, MSIN or MIST-X
 %\departmenthead{Dr. Dena Haritos Tsamitis}
 %\dean{Dr. Pradeep Khosla}
-\previousdegreelist{B.S., Stuff Learned, Some other School \\ M.S., More Stuff Learned, Another School}% Separate Multiple Entries with ' \\ '
-\fulldate{April, 2012} % Month, Year
+\previousdegreelist{B.Sc., Royal Holloway University of London}% Separate Multiple Entries with ' \\ '
+\fulldate{May, 2025} % Month, Year
 % Year the degree was/will be conferred
-\degreeyear{2019}
+\degreeyear{2025}
 
 % Copyright text.  If undefined, default is 'All rights reserved'
 % (Example sets the text to a hyperlinked Creative Commons Licence)
@@ -126,15 +127,11 @@
 %
 %-----------------------------------------------------------------------------%
 \include{{./Chapter1/introduction}}
-%\include{{./Chapter2/background}} % A regular chapter, starts with '\chapter{Title}'
-\include{{./Chapter3/related}}
-\include{{./Chapter4/overview}}
-%\include{{./Chapter5/implementation}} //Some other possible sections
-%\include{{./Chapter6/testing}}
-%\include{{./Chapter7/results}}
-%\include{{./Chapter8/conclusion}}
-%\include{{./Chapter9/discussion}}
-%\include{{./Chapter10/future}}
+\include{{./Chapter2/background}}
+\include{{./Chapter3/design}}
+\include{./Chapter4/implementation}
+\include{{./Chapter5/evaluation}}
+\include{{./Chapter6/conclusion}}
 %==============================================================================
 
 %-----------------------------------------------------------------------------%
@@ -143,20 +140,21 @@
 % discipline's standards.  Of course, if your bibliography file isn't called
 % 'mybib.bib' you might want to change that here too :)
 %-----------------------------------------------------------------------------%
-%\nocite{*} - if you use this it will put EVERYTHING in your .bib file into the references even if you don't cite it in the text
+%\nocite{*} % - if you use this it will put EVERYTHING in your .bib file into the references even if you don't cite it in the text
 %\bibliographystyle{./Bibliography/jasa} %Formats bibliography
-\bibliographystyle{./Bibliography/IEEEtranS} %Formats bibliography
+\bibliographystyle{Bibliography/IEEEtranS} %Formats bibliography
 \cleardoublepage
 \normalbaselines %Fixes spacing of bibliography
 \addcontentsline{toc}{chapter}{Bibliography} %adds Bibliography to your table of contents
-\bibliography{./Bibliography/References} %your bibliography file - change the path if needed
+\bibliography{Bibliography/References} %your bibliography file - change the path if needed
 
 %-----------------------------------------------------------------------------%
 % APPENDICES -- OPTIONAL. These are just chapters enumerated by Appendix 1,
 %                Appendix 2, Appendix 3...
 %-----------------------------------------------------------------------------%
-\appendix
-\include{{./Appendix/appendix1}}
+
+%\appendix
+%\include{{./Appendix/appendix1}}
 % Start with '\chapter{Title}'
 %You can always add more appendices here if you want
 % You're done :)

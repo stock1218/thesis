@@ -3,9 +3,9 @@
 %% BibTeX Bibliography Style file
 %% Sorting version of IEEEtran.bst
 %% *** Not for normal IEEE work ***
-%% Version 1.131 (2012/08/12)
+%% Version 1.14 (2015/08/26)
 %% 
-%% Copyright (c) 2003-2008 Michael Shell
+%% Copyright (c) 2003-2015 Michael Shell
 %% 
 %% Original starting code base and algorithms obtained from the output of
 %% Patrick W. Daly's makebst package as well as from prior versions of
@@ -18,7 +18,7 @@
 %% 
 %% Support sites:
 %% http://www.michaelshell.org/tex/ieeetran/
-%% http://www.ctan.org/tex-archive/macros/latex/contrib/IEEEtran/
+%% http://www.ctan.org/pkg/ieeetran
 %% and/or
 %% http://www.ieee.org/
 %% 
@@ -32,7 +32,7 @@
 %% implied; without even the implied warranty of MERCHANTABILITY or
 %% FITNESS FOR A PARTICULAR PURPOSE! 
 %% User assumes all risk.
-%% In no event shall IEEE or any contributor to this code be liable for
+%% In no event shall the IEEE or any contributor to this code be liable for
 %% any damages or losses, including, but not limited to, incidental,
 %% consequential, or any other damages, resulting from the use or misuse
 %% of any information contained here.
@@ -48,52 +48,8 @@
 %% Retain all contribution notices and credits.
 %% ** Modified files should be clearly indicated as such, including  **
 %% ** renaming them and changing author support contact information. **
-%%
-%% File list of work: IEEEabrv.bib, IEEEfull.bib, IEEEexample.bib,
-%%                    IEEEtran.bst, IEEEtranS.bst, IEEEtranSA.bst,
-%%                    IEEEtranN.bst, IEEEtranSN.bst, IEEEtran_bst_HOWTO.pdf
 %%*************************************************************************
-%
-%
-% Changelog:
-%
-% 1.10 (2002/09/27) Initial release
-%
-% 1.11 (2003/04/02)
-%  1. Fixed bug with URLs containing underscores when using url.sty. Thanks
-%     to Ming Kin Lai for reporting this.
-%
-% 1.12 (2007/01/11)
-%  1. Fixed bug with unwanted comma before "et al." when an entry contained
-%     more than two author names. Thanks to Pallav Gupta for reporting this.
-%  2. Fixed bug with anomalous closing quote in tech reports that have a
-%     type, but without a number or address. Thanks to Mehrdad Mirreza for
-%     reporting this.
-%  3. Use braces in \providecommand in begin.bib to better support
-%     latex2html. TeX style length assignments OK with recent versions
-%     of latex2html - 1.71 (2002/2/1) or later is strongly recommended.
-%     Use of the language field still causes trouble with latex2html.
-%     Thanks to Federico Beffa for reporting this.
-%  4. Added IEEEtran.bst ID and version comment string to .bbl output.
-%  5. Provide a \BIBdecl hook that allows the user to execute commands
-%     just prior to the first entry.
-%  6. Use default urlstyle (is using url.sty) of "same" rather than rm to
-%     better work with a wider variety of bibliography styles.
-%  7. Changed month abbreviations from Sept., July and June to Sep., Jul.,
-%     and Jun., respectively, as IEEE now does. Thanks to Moritz Borgmann
-%     for reporting this.
-%  8. Control entry types should not be considered when calculating longest
-%     label width.
-%  9. Added alias www for electronic/online.
-% 10. Added CTLname_url_prefix control entry type.
-% 
-% 1.13 (2008/09/30)
-%  1. Fixed bug with edition number to ordinal conversion. Thanks to
-%     Michael Roland for reporting this and correcting the algorithm.
-%
-% 1.131 (2012/12/08
-%  1. Print a period after the URL
-%  2. Support urldate to be printed as [Accessed ...].
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% DEFAULTS FOR THE CONTROLS OF THE BST STYLE %%
@@ -130,9 +86,15 @@ FUNCTION {default.is.use.number.for.article} { #1 }
 FUNCTION {default.is.use.paper} { #1 }
 
 
+% #0 turns off the display of urls
+% #1 enables
+FUNCTION {default.is.use.url} { #1 }
+
+
 % #0 turns off the forced use of "et al."
 % #1 enables
 FUNCTION {default.is.forced.et.al} { #0 }
+
 
 % The maximum number of names that can be present beyond which an "et al."
 % usage is forced. Be sure that num.names.shown.with.forced.et.al (below)
@@ -142,6 +104,7 @@ FUNCTION {default.is.forced.et.al} { #0 }
 % used profusely.
 FUNCTION {default.max.num.names.before.forced.et.al} { #10 }
 
+
 % The number of names that will be shown with a forced "et al.".
 % Must be less than or equal to max.num.names.before.forced.et.al
 FUNCTION {default.num.names.shown.with.forced.et.al} { #1 }
@@ -150,6 +113,7 @@ FUNCTION {default.num.names.shown.with.forced.et.al} { #1 }
 % #0 turns off the alternate interword spacing for entries with URLs.
 % #1 enables
 FUNCTION {default.is.use.alt.interword.spacing} { #1 }
+
 
 % If alternate interword spacing for entries with URLs is enabled, this is
 % the interword spacing stretch factor that will be used. For example, the
@@ -163,7 +127,7 @@ FUNCTION {default.ALTinterwordstretchfactor} { "4" }
 
 
 % #0 turns off the "dashification" of repeated (i.e., identical to those
-% of the previous entry) names. IEEE normally does this.
+% of the previous entry) names. The IEEE normally does this.
 % #1 enables
 FUNCTION {default.is.dash.repeated.names} { #1 }
 
@@ -194,8 +158,8 @@ FUNCTION {is.print.banners.to.terminal} { #1 }
 %% FILE VERSION AND BANNER %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-FUNCTION{bst.file.version} { "1.13" }
-FUNCTION{bst.file.date} { "2008/09/30" }
+FUNCTION{bst.file.version} { "1.14" }
+FUNCTION{bst.file.date} { "2015/08/26" }
 FUNCTION{bst.file.website} { "http://www.michaelshell.org/tex/ieeetran/bibtex/" }
 
 FUNCTION {banner.message}
@@ -231,7 +195,8 @@ FUNCTION {completed.message}
 %%%%%%%%%%%%%%%%%%%%%%
 %% STRING CONSTANTS %%
 %%%%%%%%%%%%%%%%%%%%%%
-
+FUNCTION {bbl.a}{ "A" }
+FUNCTION {bbl.an}{ "An" }
 FUNCTION {bbl.and}{ "and" }
 FUNCTION {bbl.etal}{ "et~al." }
 FUNCTION {bbl.editors}{ "eds." }
@@ -252,6 +217,7 @@ FUNCTION {bbl.revision}{ "Rev." }
 FUNCTION {bbl.series}{ "ser." }
 FUNCTION {bbl.standard}{ "Std." }
 FUNCTION {bbl.techrep}{ "Tech. Rep." }
+FUNCTION {bbl.the}{ "The" }
 FUNCTION {bbl.mthesis}{ "Master's thesis" }
 FUNCTION {bbl.phdthesis}{ "Ph.D. dissertation" }
 FUNCTION {bbl.st}{ "st" }
@@ -267,7 +233,7 @@ FUNCTION {large.space} { "\hskip 1em plus 0.5em minus 0.4em\relax " }
 % The LaTeX code for dashes that are used to represent repeated names.
 % Note: Some older IEEE journals used something like
 % "\rule{0.275in}{0.5pt}\," which is fairly thick and runs right along
-% the baseline. However, IEEE now uses a thinner, above baseline,
+% the baseline. However, the IEEE now uses a thinner, above baseline,
 % six dash long sequence.
 FUNCTION {repeated.name.dashes} { "------" }
 
@@ -327,12 +293,12 @@ ENTRY
     title
     type
     url
-    urldate
     volume
     year
     yearfiled
     CTLuse_article_number
     CTLuse_paper
+    CTLuse_url
     CTLuse_forced_etal
     CTLmax_names_forced_etal
     CTLnames_show_etal
@@ -368,6 +334,7 @@ INTEGERS { longest.label.width multiresult nameptr namesleft number.label numnam
 
 INTEGERS { is.use.number.for.article
            is.use.paper
+           is.use.url
            is.forced.et.al
            max.num.names.before.forced.et.al
            num.names.shown.with.forced.et.al
@@ -399,6 +366,7 @@ STRINGS { bibinfo
 FUNCTION {initialize.controls}
 { default.is.use.number.for.article 'is.use.number.for.article :=
   default.is.use.paper 'is.use.paper :=
+  default.is.use.url 'is.use.url :=
   default.is.forced.et.al 'is.forced.et.al :=
   default.max.num.names.before.forced.et.al 'max.num.names.before.forced.et.al :=
   default.num.names.shown.with.forced.et.al 'num.names.shown.with.forced.et.al :=
@@ -421,7 +389,7 @@ FUNCTION {initialize.controls}
 % "mid.sentence", etc.) used in most other .bst files.
 % 
 % The more flexible and complex design used here was motivated in part by
-% IEEE's rather unusual bibliography style. For example, IEEE ends the
+% the IEEE's rather unusual bibliography style. For example, the IEEE ends the
 % previous field item with a period and large space prior to the publisher
 % address; the @electronic entry types use periods as inter-item punctuation
 % rather than the commas used by the other entry types; and URLs are never
@@ -845,8 +813,8 @@ FUNCTION {bibinfo.warn}
 }
 
 
-% IEEE separates large numbers with more than 4 digits into groups of
-% three. IEEE uses a small space to separate these number groups. 
+% The IEEE separates large numbers with more than 4 digits into groups of
+% three. The IEEE uses a small space to separate these number groups. 
 % Typical applications include patent and page numbers.
 
 % number of consecutive digits required to trigger the group separation.
@@ -1129,17 +1097,25 @@ FUNCTION {end.bib}
 { newline$ "\end{thebibliography}" write$ newline$ }
 
 FUNCTION {if.url.alt.interword.spacing}
-{ is.use.alt.interword.spacing 
-     {url empty$ 'skip$ {"\BIBentryALTinterwordspacing" write$ newline$} if$}
-     { skip$ }
-   if$
+{ is.use.alt.interword.spacing
+    { is.use.url
+        { url empty$ 'skip$ {"\BIBentryALTinterwordspacing" write$ newline$} if$ }
+        { skip$ }
+      if$
+    }
+    { skip$ }
+  if$
 }
 
 FUNCTION {if.url.std.interword.spacing}
-{ is.use.alt.interword.spacing 
-     {url empty$ 'skip$ {"\BIBentrySTDinterwordspacing" write$ newline$} if$}
-     { skip$ }
-   if$
+{ is.use.alt.interword.spacing
+    { is.use.url
+        { url empty$ 'skip$ {"\BIBentrySTDinterwordspacing" write$ newline$} if$ }
+        { skip$ }
+      if$
+    }
+    { skip$ }
+  if$
 }
 
 
@@ -1378,7 +1354,7 @@ FUNCTION {format.date.electronic}
 
 %% edition/title
 
-% Note: IEEE considers the edition to be closely associated with
+% Note: The IEEE considers the edition to be closely associated with
 % the title of a book. So, in IEEEtran.bst the edition is normally handled 
 % within the formatting of the title. The format.edition function is 
 % retained here for possible future use.
@@ -1630,7 +1606,7 @@ FUNCTION {format.number.if.use.for.article}
    if$
 }
 
-% IEEE does not seem to tie the series so closely with the volume
+% The IEEE does not seem to tie the series so closely with the volume
 % and number as is done in other bibliography styles. Instead the
 % series is treated somewhat like an extension of the title.
 FUNCTION {format.series}
@@ -1936,29 +1912,25 @@ cap.status.std
 
 
 %% URL
-
-FUNCTION {format.urldate}
-{ urldate empty$
-    { "" }
-    { "[Accessed " urldate "]." * * }
-  if$
-}
-
+%% 
 FUNCTION {format.url}
-{ url empty$
-    { "" }
-    { this.to.prev.status
-      this.status.std
-      cap.yes 'status.cap :=
-      name.url.prefix " " *
-      "\url{" * url * "}" *
-      "." *
-      punct.no 'this.status.punct :=
-      punct.period 'prev.status.punct :=
-      space.normal 'this.status.space :=
-      space.normal 'prev.status.space :=
-      quote.no 'this.status.quote :=
+{ is.use.url
+    { url empty$
+      { "" }
+      { this.to.prev.status
+        this.status.std
+        cap.yes 'status.cap :=
+        name.url.prefix " " *
+        "\url{" * url * "}" *
+        punct.no 'this.status.punct :=
+        punct.period 'prev.status.punct :=
+        space.normal 'this.status.space :=
+        space.normal 'prev.status.space :=
+        quote.no 'this.status.quote :=
+      }
+    if$
     }
+    { "" }
   if$
 }
 
@@ -1970,7 +1942,7 @@ FUNCTION {format.url}
 %%%%%%%%%%%%%%%%%%%%
 
 
-% Note: In many journals, IEEE (or the authors) tend not to show the number
+% Note: In many journals, the IEEE (or the authors) tend not to show the number
 % for articles, so the display of the number is controlled here by the
 % switch "is.use.number.for.article"
 FUNCTION {article}
@@ -1987,7 +1959,6 @@ FUNCTION {article}
   format.date "year" output.warn
   format.note output
   format.url output
-  format.urldate output
   fin.entry
   if.url.std.interword.spacing
 }
@@ -2012,7 +1983,6 @@ FUNCTION {book}
   format.number output
   format.note output
   format.url output
-  format.urldate output
   fin.entry
   if.url.std.interword.spacing
 }
@@ -2030,7 +2000,6 @@ FUNCTION {booklet}
   format.date output
   format.note output
   format.url output
-  format.urldate output
   fin.entry
   if.url.std.interword.spacing
 }
@@ -2048,7 +2017,6 @@ FUNCTION {electronic}
   format.address "address" bibinfo.check output
   format.note output
   format.url output
-  format.urldate output
   fin.entry
   empty.entry.warn
   if.url.std.interword.spacing
@@ -2072,7 +2040,6 @@ FUNCTION {inbook}
   format.pages output
   format.note output
   format.url output
-  format.urldate output
   fin.entry
   if.url.std.interword.spacing
 }
@@ -2094,7 +2061,6 @@ FUNCTION {incollection}
   format.pages output
   format.note output
   format.url output
-  format.urldate output
   fin.entry
   if.url.std.interword.spacing
 }
@@ -2121,7 +2087,6 @@ FUNCTION {inproceedings}
   format.pages output
   format.note output
   format.url output
-  format.urldate output
   fin.entry
   if.url.std.interword.spacing
 }
@@ -2139,7 +2104,6 @@ FUNCTION {manual}
   format.date output
   format.note output
   format.url output
-  format.urldate output
   fin.entry
   if.url.std.interword.spacing
 }
@@ -2157,7 +2121,6 @@ FUNCTION {mastersthesis}
   format.date "year" output.warn
   format.note output
   format.url output
-  format.urldate output
   fin.entry
   if.url.std.interword.spacing
 }
@@ -2176,7 +2139,6 @@ FUNCTION {misc}
   format.date output
   format.note output
   format.url output
-  format.urldate output
   fin.entry
   empty.entry.warn
   if.url.std.interword.spacing
@@ -2193,7 +2155,6 @@ FUNCTION {patent}
   format.patent.date output
   format.note output
   format.url output
-  format.urldate output
   fin.entry
   empty.entry.warn
   if.url.std.interword.spacing
@@ -2213,7 +2174,6 @@ FUNCTION {periodical}
   format.date "year" output.warn
   format.note output
   format.url output
-  format.urldate output
   fin.entry
   if.url.std.interword.spacing
 }
@@ -2231,7 +2191,6 @@ FUNCTION {phdthesis}
   format.date "year" output.warn
   format.note output
   format.url output
-  format.urldate output
   fin.entry
   if.url.std.interword.spacing
 }
@@ -2254,7 +2213,6 @@ FUNCTION {proceedings}
   if$
   format.note output
   format.url output
-  format.urldate output
   fin.entry
   if.url.std.interword.spacing
 }
@@ -2272,7 +2230,6 @@ FUNCTION {standard}
   format.date output
   format.note output
   format.url output
-  format.urldate output
   fin.entry
   if.url.std.interword.spacing
 }
@@ -2291,7 +2248,6 @@ FUNCTION {techreport}
   format.date "year" output.warn
   format.note output
   format.url output
-  format.urldate output
   fin.entry
   if.url.std.interword.spacing
 }
@@ -2306,7 +2262,6 @@ FUNCTION {unpublished}
   format.date output
   format.note "note" output.warn
   format.url output
-  format.urldate output
   fin.entry
   if.url.std.interword.spacing
 }
@@ -2335,6 +2290,14 @@ FUNCTION {IEEEtranBSTCTL}
     { CTLuse_paper
       yes.no.to.int
       'is.use.paper :=
+    }
+  if$
+  CTLuse_url
+  empty$
+    { skip$ }
+    { CTLuse_url
+      yes.no.to.int
+      'is.use.url :=
     }
   if$
   CTLuse_forced_etal
@@ -2485,9 +2448,9 @@ FUNCTION {sort.format.names}
 
 FUNCTION {sort.format.title}
 { 't :=
-  "A " #2
-    "An " #3
-      "The " #4 t chop.word
+  bbl.a " " * #2
+    bbl.an " " * #3
+      bbl.the " " * #4 t chop.word
     chop.word
   chop.word
   sortify
@@ -2528,7 +2491,7 @@ FUNCTION {author.organization.sort}
             { key sortify }
           if$
         }
-        { "The " #4 organization chop.word sortify }
+        { bbl.the " " * #4 organization chop.word sortify }
       if$
     }
     { author sort.format.names }
@@ -2543,7 +2506,7 @@ FUNCTION {editor.organization.sort}
             { key sortify }
           if$
         }
-        { "The " #4 organization chop.word sortify }
+        { bbl.the " " * #4 organization chop.word sortify }
       if$
     }
     { editor sort.format.names }
@@ -2559,10 +2522,10 @@ FUNCTION {author.organization.institution.sort}
                 { key sortify }
               if$
             }
-            { "The " #4 institution chop.word sortify }
+            { bbl.the " " * #4 institution chop.word sortify }
           if$
         }
-        { "The " #4 organization chop.word sortify }
+        { bbl.the " " * #4 organization chop.word sortify }
       if$
     }
     { author sort.format.names }
@@ -2625,7 +2588,7 @@ FUNCTION {presort}
 
 ITERATE {presort}
 
-%SORT
+SORT
 
 % END sort code based on that of plain.bst
 
@@ -2642,4 +2605,3 @@ EXECUTE{completed.message}
 
 
 %% That's all folks, mds.
-

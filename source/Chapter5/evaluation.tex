@@ -1,0 +1,197 @@
+\chapter{Evaluation}
+\label{sec:evaluation}
+
+This chapter is related to the evaluation of the proposed design and subsequent implementation of the clang-tidy tidy check described in this thesis. It begins with defining several research questions to be answered by the evaluation, followed by a methodology for how these questions will be answered. It will finally end with real results observed from several real-world codebases to answer these research questions based on the metrics defined.
+
+\section{Research Questions}
+
+The following are a set of research questions that are posed as part of this evaluation.
+
+\subsection{\textbf{RQ1: How comprehensive is the rewrite?}}
+Fundamentally there is a question of how many expressions can the clang-tidy check rewrite relative to the total number of operations that can overflow. This is essentially measuring how much more secure a rewrite is given each rewrite is performed correctly. The implications of this will determine how effective or ineffective such a tool would be. An interesting detail here is figuring out how many rewrites are not possible given the current checked arithmetic macros supplied by the C23 standard.
+
+\subsection{\textbf{RQ2: What are common reasons lines are omitted from rewrites?}}
+As with any static analysis tool, the issue of false positives and false negatives will be an important factor in how useful such a tool will be. This question will need to be investigated to determine how practical it is to perform rewrites without much manual intervention (i.e. commenting certain lines so they are exempt). Finding common reasons for exceptions is also a detail this question is trying to solve, which may reveal further limitations.
+
+\subsection{\textbf{RQ3: What is the performance overhead of using checked arithmetic?}}
+Once a tool or library is rewritten using checked arithmetic, what kind of performance overhead does this induce at runtime? As with the previous questions, this detail can be an important factor as to how practical such a tool is. This is especially true in safety critical systems, which often run as a real-time operating system and must meet certain performance requirements.
+
+With these questions now defined, we move on to the methodology for answering said questions.
+
+\section{Evaluation Methodology}
+
+Finding answers to these questions will start with locating a set of targets to perform tests on. Once this is done, the evaluation itself will consist of several approaches. The main approach will utilize a script that will automatically calculate statistics based on warnings and outputs from clang-tidy. Beyond this, manual testing will be used to collect performance overhead statistics as well as qualitative measurements on the experience of performing a full rewrite and noting which expressions must be omitted.
+
+\subsection{Selecting targets}
+
+A set of target codebases to rewrite should be selected to evaluate the effectiveness of the clang-tidy check. Due to the nature of the check and the questions being answered, the targets should have source available and have a test suite to ensure that the rewritten code does not introduce any bugs. That being said, three targets were selected. The first is a relatively popular strings library \texttt{str.h}, which contains many complex statements that should be able to test the rewrite quite broadly. The second is \texttt{Monocypher}, a cryptography library that also contains a lot of complex operations. Given how close cryptography and security are, having a checked cryptography library is something that may be desired. Finally, Binutils was rewritten using the check. Binutils is GNU's tool suite for operating on binary files and is often the subject of testing software for research. These targets should be sufficiently complex to measure the effectiveness of the clang-tidy check.
+
+\subsection{Evaluating comprehensiveness}
+
+Comprehensiveness will be measured as how many arithmetic operations exist that can overflow verses how many operations are actually rewritten. Given the type restrictions of arguments passed to the checked arithmetic macros, it is expected that there should almost always be fewer rewrites than there are operations that may overflow.
+
+The main approach to collecting this information is to write two clang-tidy checks: one "debug" check that will match on all $+$, $-$, and $*$ operations (and their variations) without type restrictions, and the real check which will do the same only with narrowing matchers based on type restrictions.
+
+Note that there was some discussion about why even measure statements you cannot write given the current C23 macro definitions. This I believe highlights a major limitation of the current state of these macros, and yields a more accurate measurement of how much more secure a codebase is. However, a third check was also implemented that does have type restrictions which would measure "of the statements you can rewrite, how many get rewritten".
+
+\subsection{Evaluating common exceptions}
+
+Common exceptions will generally come down to the user experience: when a rewrite breaks something, what is a general pattern that causes this issue. This is difficult to quantitatively measure, so the evaluation of this question will be qualitative. That is, as different targets are rewritten, I will go through and locate issues I notice and have to manually address through an exemption comment. I will then take note of the issues to be used in the evaluation.
+
+\subsection{Evaluating performance overhead}
+
+Measuring performance will generally take the shape of running a test suite on a target and noting the time, performing a full rewrite, then running the test suite again and recording the time. Note that each run of the test suite under a timer should be performed several times, then averaged to get a more accurate timing metric.
+
+\section{Results}
+
+Below are comments on the findings on the aforementioned targets.
+
+\subsection{str.h}
+
+This was the first target to be rewritten and was relatively straight forward. The statistics on how the plugin performed can be found in \ref{tab:str.h}. The main metric for comprehensiveness is the fixes over potential replacements, which came out to 80.84\%. This is a relatively high number of replacements but it is not 100\%. We know that this is due to the type restrictions imposed on the checked arithmetic macros, since the Typed Debug Plugin detected the same number of potential replacements as the number of replacements actually performed. Other interesting metrics are the number of overlapping fixes, which sits at 2. When clang-tidy applies a fix, then encounters a fix on the same line, only one fix will be applied at a time. This is why the check may need to run multiple times. Since there are two overlapping fixes, we should expect to run the check at most 2 more times to get a complete rewrite.
+
+\ref{tab:str.h} contains other interesting metrics like the distribution of different operations, which may give a better picture on the type of statements being rewritten and how much more coverage the clang-tidy check achieves by implementing rewrites for these statements.
+
+\begin{table}[ht]
+\centering
+\caption{Plugin Statistics for str.h}
+\label{tab:str.h}
+\begin{tabular}{@{}llr@{}}
+\toprule
+\textbf{Plugin} & \textbf{Warnings} & \textbf{Result} \\
+\midrule
+
+\multirow{4}{*}{Debug Plugin} 
+  & Potential replacements & 595 \\
+  & Unary operations        & 59 (9.92\%) \\
+  & Assignment operations   & 271 (45.55\%) \\
+  & Non-assignment operations & 265 (44.54\%) \\
+\midrule
+
+\multirow{4}{*}{Typed Debug Plugin} 
+  & Potential replacements & 481 \\
+  & Unary operations        & 17 (3.53\%) \\
+  & Assignment operations   & 233 (48.44\%) \\
+  & Non-assignment operations & 231 (48.02\%) \\
+\midrule
+
+\multirow{5}{*}{Real Plugin} 
+  & Replacements            & 481 \\
+  & Unary operations        & 17 (3.53\%) \\
+  & Assignment operations   & 233 (48.44\%) \\
+  & Non-assignment operations & 231 (48.02\%) \\
+  & Overlapping fixes       & 2 (0.42\%) \\
+\midrule
+\midrule
+\multirow{4}{*}{Total Coverage} 
+  & Fixes / Potential Replacements & 481 / 595 (80.84\%) \\
+  & Unary Ops Fixed                & 17 / 59 (28.81\%) \\
+  & Assignment Ops Fixed           & 233 / 271 (85.98\%) \\
+  & Non-assignment Ops Fixed       & 231 / 265 (87.17\%) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The rewrite experience was very straight forward for this library even considering the complex arithmetic involved in string manipulation. The plugin was run on the source directory three times to rewrite all possible statements, however notably macro related rewrites were not going through. At the time of writing it is unknown why this is, however it is technically out of scope. Once the rewrites were performed and formatting was applied the library was built and test ran without error as if nothing had changed.
+
+TODO performance
+
+\subsection{Monocypher}
+
+The performance statistics for the rewrite of Monocypher can be found in \ref{tab:mono}. Compared with str.h, the clang-tidy check performed better with a total coverage of 85.06\% of statements rewritten. There are also a number of dramatic differences between the number of overlapping fixes and the proportion of unary operations fixed. This means there are a lot of complex nested arithmetic statements, and a high number of unary operations that can be fixed by the check.
+
+The process of rewriting Monocypher was not without challenge. This is because many of the statements that were rewritten actually took advantage of unsigned integer wraparound. This became an issue when running the tests with the default rewrite handlers, which would trigger \texttt{assert(0)} when an overflow was detected. This was good and bad news: potential integer overflows and wraparounds were being detected, but many were false positives. The easiest thing to do was to run the tests and find which assert was being triggered, then comment out the assert statement. This however quickly became a time consuming process given how many statements had intended wraparound. To get the rewrite to still work, an empty handler function was defined in the clang-tidy config for the check to use. This resulted in the rewrite being performed, but if overflow was detected, nothing would happen and execution would continue. This highlights the important differences between overflow and wraparound, and that the plugin in it's current state does not differentiate between the two. This is partly due to the macros treating both overflow and wraparound the same, but the plugin could have an option to only match and rewrite signed arithmetic statements.
+
+TODO performance
+
+\begin{table}[ht]
+\centering
+\caption{Plugin Statistics for Monocypher}
+\label{tab:mono}
+\begin{tabular}{@{}llr@{}}
+\toprule
+\textbf{Plugin} & \textbf{Warnings} & \textbf{Result} \\
+\midrule
+
+\multirow{4}{*}{Debug Plugin} 
+  & Potential replacements         & 1185 \\
+  & Unary operations               & 112 (9.45\%) \\
+  & Assignment operations          & 583 (49.20\%) \\
+  & Non-assignment operations      & 490 (41.35\%) \\
+\midrule
+
+\multirow{4}{*}{Typed Debug Plugin} 
+  & Potential replacements         & 1008 \\
+  & Unary operations               & 111 (11.01\%) \\
+  & Assignment operations          & 489 (48.51\%) \\
+  & Non-assignment operations      & 408 (40.48\%) \\
+\midrule
+
+\multirow{5}{*}{Real Plugin} 
+  & Replacements                   & 1008 \\
+  & Unary operations               & 111 (11.01\%) \\
+  & Assignment operations          & 489 (48.51\%) \\
+  & Non-assignment operations      & 408 (40.48\%) \\
+  & Overlapping fixes              & 192 (19.05\%) \\
+\midrule\midrule
+
+\multirow{4}{*}{Total Coverage} 
+  & Fixes / Potential Replacements & 1008 / 1185 (85.06\%) \\
+  & Unary Ops Fixed                & 111 / 112 (99.11\%) \\
+  & Assignment Ops Fixed           & 489 / 583 (83.88\%) \\
+  & Non-assignment Ops Fixed       & 408 / 490 (83.27\%) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Binutils}
+
+Of the targets selected, Binutils is by a large margin the largest and most complex codebase to be rewritten. Nonetheless, a rewrite was successful and the statistics can be found in \ref{tab:binutils}.
+
+These statistics demonstrate how large and complex the codebase is, with 174 overlapping fixes and 50.11\% rewrite coverage. The overlapping fixes is much larger than the previous targets, and becomes a more serious issue when considering the amount of time clang-tidy ran to achieve a single rewrite pass: 5 minutes. If 174 rewrites are required to ensure all statements are rewritten, this would take 14 hours to complete. This is a worse case scenario, however even a fraction of this time is not insignificant. The lower number of expressions rewritten demonstrates how much the impact these type restrictions have on the rewrite, which is at 100\% for expressions with supported types.
+
+TODO rewrite experience
+
+TODO performance
+
+\begin{table}[ht]
+\centering
+\caption{Plugin Statistics for Binutils}
+\label{tab:binutils}
+\begin{tabular}{@{}llr@{}}
+\toprule
+\textbf{Plugin} & \textbf{Warnings} & \textbf{Result} \\
+\midrule
+
+\multirow{4}{*}{Debug Plugin} 
+  & Potential replacements         & 6974 \\
+  & Unary operations               & 1243 (17.82\%) \\
+  & Assignment operations          & 3439 (49.31\%) \\
+  & Non-assignment operations      & 2292 (32.86\%) \\
+\midrule
+
+\multirow{4}{*}{Typed Debug Plugin} 
+  & Potential replacements         & 3495 \\
+  & Unary operations               & 684 (19.57\%) \\
+  & Assignment operations          & 1599 (45.75\%) \\
+  & Non-assignment operations      & 1212 (34.68\%) \\
+\midrule
+
+\multirow{5}{*}{Real Plugin} 
+  & Replacements                   & 3495 \\
+  & Unary operations               & 684 (19.57\%) \\
+  & Assignment operations          & 1599 (45.75\%) \\
+  & Non-assignment operations      & 1212 (34.68\%) \\
+  & Overlapping fixes              & 174 (4.98\%) \\
+\midrule\midrule
+
+\multirow{4}{*}{Total Coverage} 
+  & Fixes / Potential Replacements & 3495 / 6974 (50.11\%) \\
+  & Unary Ops Fixed                & 684 / 1243 (55.03\%) \\
+  & Assignment Ops Fixed           & 1599 / 3439 (46.50\%) \\
+  & Non-assignment Ops Fixed       & 1212 / 2292 (52.88\%) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+This chapter demonstrates that while this approach does work in some capacity, there are a number of pitfalls related to type restrictions as well as the time it takes to actually perform the rewrites. TODO comments about rewrites and performance
