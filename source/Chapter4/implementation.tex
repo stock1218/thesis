@@ -1,29 +1,29 @@
 \chapter{Implementation}
 \label{sec:implementation}
 
-This chapter will go into detail about how the \texttt{use-checked-arithmetic} Clang Tidy plugin was developed. This includes the general steps for writing a check, the domain specific language used for matching on AST nodes, and specific challenges that were overcome with relation to this particular check. At the end of the chapter, there will be walkthroughs of specific rewrites for different types of operations and how they work.
+This chapter will go into detail about how the \texttt{use-checked-arithmetic} clang-tidy plugin was developed. This includes the general steps for writing a check, the domain specific language used for matching on AST nodes, and specific challenges that were overcome with relation to this particular check. At the end of the chapter, there will be walkthroughs of specific rewrites for different types of operations and how they work.
 
-\section{How to Write a Clang-Tidy Plugin}
+\section{How to Write a Clang-Tidy Check}
 
-A Clang tidy itself is essentially an advanced linting tool that utilizes all of the features LibTooling provides to detect patterns in source to provide warnings and potential fixes. The most basic check is made up of two parts: a set of matchers and the check itself.
+Clang-tidy is an advanced linting tool that utilizes all of the features LibTooling provides for detecting patterns in source to provide warnings and potential fixes. The most basic check is made up of two parts: a set of matchers and the check itself.
 
-Matchers are constructed using the LibASTMatcher interface, which allows programmers to us a declarative domain specific language (DSL) to describe patterns in the AST to "match". When a match is found, the matched expression is passed to the \texttt{check()} function to handle the rest. These matchers are registered to a check via the \texttt{registerMatchers()} function.
+Matchers are constructed using the LibASTMatcher interface, which allows programmers to us a declarative domain specific language (DSL) to describe patterns in the AST to ``match". When a match is found, the matched expression is passed to the \texttt{check()} function to handle the rest. These matchers are registered to a check via the \texttt{registerMatchers()} function.
 
-The \texttt{check()} function can really be anything, however the most basic check will have a diagnostic output that prints the matched expression followed by an explanation of what the check has found. This is a very basic example, and really the possibilities for what the check can do from here are endless. The main functionality of a code modernization check will be to generate a rewrite of the matched statement. LibTooling also provides a convenient \texttt{FixItHint} interface for generating suggested code fixes beside their warnings that a user can apply with the \texttt{--fix} or \texttt{--fix-errors} flag to clang-tidy. Of course it goes without saying that any helper functions or entire check implementations that exist elsewhere can be called within the \texttt{check()} function, which is often the case for many of the clang-tidy checks that already exist.
+The \texttt{check()} function can really be anything, however the most basic check will have a diagnostic output that prints the matched expression followed by an explanation of what the check has found. This is a very basic example, and really the possibilities for what the check can do from here are endless. The main functionality of a code modernization check will be to generate a rewrite of the matched statement. LibTooling also provides a convenient \texttt{FixItHint} interface for generating suggested code fixes beside their warnings that a user can apply with the \texttt{--fix} or \texttt{--fix-errors} flag passed to clang-tidy. Of course it goes without saying that any helper functions or entire check implementations that exist elsewhere can be called within the \texttt{check()} function, which is often the case for many of the clang-tidy checks that already exist.
 
 These are the two components a developer needs to implement to create a clang-tidy check, however there are some fundamental questions that need to be answered. The first is where the code for the check actually exists? The answer is in the clang-tidy binary and source tree itself. This has a number of implications, namely that a developer needs to check out the LLVM project in order to build a clang-tidy check and proceed with a build of LLVM (technically not all of it, mostly clang and it's libraries). This can be a daunting task but once completed should not be a barrier to further development. 
 
-Clang Tidy is part of the Clang Tools Extra project and thus lives in the \\ \texttt{clang-tools-extra/clang-tidy} subdirectory of the LLVM project. In this directory there are subdirectories that organize the different checks available to Clang Tidy by their main purpose. To name a few these include: performance for source-level performance operations, portability to writing portable code, and modernize for updating old codebases (where our check will live).
+Clang-tidy is part of the Clang Tools Extra project and thus lives in the \\ \texttt{clang-tools-extra/clang-tidy} subdirectory of the LLVM project. In this directory there are subdirectories that organize the different checks available to clang-tidy by their main purpose. To name a few these include: performance for source-level performance optimizations, portability for writing portable code, and modernize for updating old codebases. The check we are writing will be in the modernization subdirectory.
 
-A check writer could create source and header files in one of these directories to contain their check, then register their check within their specific module via the \texttt{registerCheck()} function. Luckly there is a nice script that LLVM provides names \texttt{add\_new\_check.py} that automatically handles creating template files and registering the check (and creating documentation!), leaving the developer to write their matchers and check without having to deal with any other overhead. Additionally, there is a \texttt{rename\_check.py} file that will rename the check, which also involves editing the check registration.
+A check writer could create source and header files in one of these directories to contain their check, then register their check within their specific module via the \texttt{registerCheck()} function. Luckly there is a nice script that LLVM provides named \texttt{add\_new\_check.py} that automatically handles creating template files, registering the check, and creating documentation. The developer is then left to write their matchers and check without having to deal with any other overhead. Additionally, there is a \texttt{rename\_check.py} file that will rename the check, which also involves editing the check registration.
 
 Now with this overview, let's discuss how to write a matcher.
 
 \section{Writing AST Matchers}
 
-When Clang compiles a program, it will eventually generate an Abstract Syntax Tree (AST) that captures the semantics of the program it is compiling in a structured format to be used later. The AST is made up of a set of \textit{nodes}, with the topmost being a translation unit declaration. The rest of the tree will be made up of \texttt{Type}, \texttt{Decl}, \texttt{DeclContext}, and \texttt{Stmt} nodes (or nodes that derive from these types). Type nodes are related to C statements for creating types like \texttt{typedef}. Decl nodes represent a declaration or definition like a variable, struct, or function. DeclContext is a special base-class used by other nodes to store other declarations they may contain. Finally, Stmt nodes will represent a single statement. It is important to note that arithmetic operations will be represented by \texttt{Expr} nodes, which is a subclass of \texttt{Stmt}.
+When Clang compiles a program, it will eventually generate an Abstract Syntax Tree (AST) that captures the semantics of the program it is compiling in a structured format to be used later. The AST is made up of a set of \textit{nodes}, with the topmost being a translation unit declaration. The rest of the tree will be made up of \texttt{Type}, \texttt{Decl}, \texttt{DeclContext}, and \texttt{Stmt} nodes (or nodes that derive from these types). Type nodes are related to C statements for creating types like \texttt{typedef}. \texttt{Decl} nodes represent a declaration or definition like a variable, struct, or function. \texttt{DeclContext} is a special base-class used by other nodes to store other declarations they may contain. Finally, \texttt{Stmt} nodes will represent a single statement. It is important to note that arithmetic operations will be represented by \texttt{Expr} nodes, which is a subclass of \texttt{Stmt}.
 
-AST matchers allow programmers to write out patterns to locate in the AST in a conscise and declarative manner. The basic structure of an AST matcher is a \textit{creator function}, which can contain more matchers within it to make the matcher more specific. For example, say we would want to make a matcher that would match on all binary operations in the AST (something we probably want to do in the near future). This would be written as \texttt{binaryOperator()}. We would then make this matcher more specific by adding more matchers to the binary operator matcher like arguments. If we want to only match on additions, we would write this as \texttt{binaryOperator(hasOperatorName("+"))}. The matcher can quickly become quite expressive with generic matchers \texttt{allOf()} (similar to \&\&), \texttt{anyOf()} (like ||), \texttt{unless()} (like !), just to name a few. These matchers can be quite specific as well like the \texttt{gnuNullExpr} matcher, which will match on GNU \_\_null expressions.
+AST matchers allow programmers to write out AST patterns to locate in a concise and declarative manner. The basic structure of an AST matcher is a \textit{creator function}, which can contain more matchers within it to make the matcher more specific. For example, say we would want to make a matcher that would match on all binary operations in the AST. This would be written as \texttt{binaryOperator()}. We would then make this matcher more specific by adding more matchers to the binary operator matcher like arguments. If we want to only match on additions, we would write this as \texttt{binaryOperator(hasOperatorName("+"))}. The matcher can quickly become expressive with generic matchers \texttt{allOf()} (similar to \texttt{\&\&}), \texttt{anyOf()} (\texttt{||}), \texttt{unless()} (!), just to name a few. These matchers can be specific as well like the \texttt{gnuNullExpr} matcher, which will match on GNU \texttt{\_\_null} expressions.
 
 \section{Implementing a Check}
 
@@ -34,7 +34,7 @@ As outlined in previous chapters, the clang-tidy check needs to locate all of th
 \texttt{binaryOperator()}
 \end{center}
 
-This will match on \textit{any} binary operation, including comparison operators like \texttt{<}, \texttt{!=} or logical operators like \texttt{\&\&}. We will only rewrite the +, -, and * operators, so we need to narrow our matcher to only these binary operations like so:
+This will match on \textit{any} binary operation, including comparison operators like \texttt{<}, \texttt{!=} and logical operators like \texttt{\&\&}. We will only rewrite the +, -, and * operators, so we need to narrow our matcher to only these binary operations like so:
 \begin{center}
 \texttt{binaryOperator(hasOperatorName("+", "-", "-"))}
 \end{center}
@@ -52,17 +52,28 @@ This seems like a valid matcher, however it is missing an important restriction:
 
 Note that we need to introduce the \texttt{ignoringImplicitCasts()} matcher to get to the child nodes we want to interact with. This is because the AST contains \texttt{ImplicitCastExpr} when an implicit cast is generated by a particular statement, which we do not want to match on. There are ways to automatically ignore these nodes by setting the traversal mode of the matcher, however these nodes were seen as potential resources for gathering type information and thus matchers were developed with them in mind.
 
-This is essentially what the final non-assignment operator matcher looks like. This matcher will not match on unary or assignment operators, which is discussed later in this chapter.
+In an assignment operation, we also need to have type checks on the result of the operation. To do this, we can use the \texttt{hasParent()} matcher to traverse to the parent of our binary operation, then check the type of that node. This will allow us to capture any casts or assignments to a different type for us to correctly check if the resultant will actually fit in the destination. The final matcher is as follows:
+\begin{center}
+\parbox{0.9\linewidth}{
+\texttt{binaryOperator(\\
+\hspace*{4em}hasAnyOperatorName("+", "-", "*"),\\
+\hspace*{4em}hasParent(expr(hasType(isInteger()))),\\
+\hspace*{4em}hasLHS(ignoringImpCasts(hasType(isInteger()))),\\
+\hspace*{4em}hasRHS(ignoringImpCasts(hasType(isInteger()))))\\
+)}
+}
+\end{center}
 
-LLVM also provides the Clang Query tool, which is a direct interface between an AST and running matchers on said AST. This tool was invaluable for iterating on the matcher and quickly testing it on examples that were written by hand without having to rebuild clang-query each time.
+LLVM also provides the clang-query tool, which will give developers a type of REPL to run matchers on an AST given by a particular source. This tool was invaluable for iterating on the matcher and quickly testing it on examples that were written by hand without having to rebuild clang-query each time.
 
 \subsection{Binding to Subexpressions}
 
-It is one thing to match to an expression, however the check will need to retrieve specific nodes to perform the rewrite. This is done by calling the \texttt{bind()} method like so \texttt{binaryOperator().bind("binary-operation")}, where the string \texttt{binary-operation} will serve as an identifier for the matched binary operator node. This introduces an issue with the existing query: we cannot call \texttt{bind} on the \texttt{isInteger()} matcher. A solution to this is to use a new \texttt{hasLHS}/\texttt{hasRHS} matcher specifically for binding to the subexpression like so:
+It is one thing to match to an expression, however the check will need to retrieve specific nodes to perform the rewrite. This is done by calling the \texttt{bind()} method like so \texttt{binaryOperator().bind("binary-operation")}, where the string \texttt{binary-operation} will serve as an identifier for the matched binary operator node. This introduces an issue with the existing query: we cannot call \texttt{bind} on the \texttt{isInteger()} matcher. A solution to this is to use a new \texttt{hasLHS} and \texttt{hasRHS} matcher specifically for binding to the subexpression like so:
 \begin{center}
 \parbox{0.9\linewidth}{
 \texttt{StatementMatcher makeNonAssignmentMatcher() \{\\
 \hspace*{2em}return binaryOperation(\\
+\hspace*{2em}hasParent(expr(hasType(isInteger()))).bind("parent-expr"),\\
 \hspace*{4em}hasAnyOperatorName("+", "-", "*"),\\
 \hspace*{4em}hasLHS(ignoringImpCasts(hasType(isInteger()))),\\
 \hspace*{4em}hasLHS(ignoringImpCasts(expr().bind("argOne"))),\\
@@ -73,7 +84,6 @@ It is one thing to match to an expression, however the check will need to retrie
 }
 }
 \end{center}
-TODO this needs to be updated, talk about two different matchers
 
 Notice that there are now \texttt{bind()} calls on the whole binary operator statement and each argument. With this, we can now match on non-assignment operations and bind to the specific arguments we will need to perform our rewrite.
 
@@ -152,4 +162,152 @@ This string is then used to create a \texttt{FitItHint}, which will apply the re
 
 \section{Walkthrough of Assignment Operator Rewrites}
 
+The full matcher for locating assignment operations to rewrite is as follows:
+
+\begin{center}
+\parbox{0.9\linewidth}{
+\texttt{return binaryOperation(\\
+\hspace*{2em}hasAnyOperatorName("+=," "-=," "*="), isAssignmentOperator(),\\
+\hspace*{2em}hasLHS(ignoringImpCasts(hasType(isInteger()))),\\
+\hspace*{2em}hasLHS(ignoringImpCasts(\\
+\hspace*{4em}anyOf(expr().bind("dest"), integerLiteral().bind("dest")))),\\
+\hspace*{2em}hasRHS(ignoringImpCasts(hasType(isInteger()))),\\
+\hspace*{2em}hasRHS(ignoringImpCasts(\\
+\hspace*{4em}anyOf(expr().bind("arg"), integerLiteral().bind("arg"))))\\
+).bind("AssignmentOp");}
+}
+\end{center}
+
+The difference with this matcher as opposed to the non-assignment matcher is there is no need for matchers related to the parent and the operator names. We don't need to match to the parent because we can already get the destination type based on the LHS, which will be the same as the destination.
+
+We need to capture the side-effect of the assignment operation, whatever it may be. This is different from the non-assignment rewrite because the destination is not an operand in the operation itself like it is here. Thus, this rewrite will collect a pointer to the destination, then dereference that pointer as an operand to the checked arithmetic macro. Consider the following code:
+
+\begin{center}
+\parbox{0.6\linewidth}{
+\texttt{unsigned int a = 1;\\
+unsigned int b = UINT\_MAX;\\
+a += b;}
+}
+\end{center}
+
+This approach will rewrite the code like so:
+\begin{center}
+\parbox{0.8\linewidth}{
+\texttt{unsigned int a = 1;\\
+unsigned int b = UINT\_MAX;\\
+(\{\\
+\hspace*{2em}unsigned int* dest = \&a;\\
+\hspace*{2em}unsigned int arg = b;\\
+\hspace*{2em}if(ckd\_add(dest, *dest, arg)) \{\\
+\hspace*{4em}// Handle error\\
+\hspace*{2em}\}\\
+\hspace*{2em}*dest;\\
+\});}
+}
+\end{center}
+
+This rewrite is captured in the check with the following code:
+\begin{center}
+\parbox{0.99\linewidth}{
+\texttt{auto replacement = "(\{ " + destType + "* dest = " + "\&" + destSource + ";\textbackslash n";\\
+replacement += argType + " arg = " + argSource + ";\textbackslash n";\\
+replacement += "if(" + ckdFunc + "(dest, *dest, arg)) \{";\\
+replacement += HandleCode + "\textbackslash n\};";\\
+replacement += "*dest;\})";}
+}
+\end{center}
+
 \section{Walkthrough of Unary Operator Rewrites}
+
+Matching on unary operations is simple and done with the following matcher:
+\begin{center}
+\parbox{0.9\linewidth}{
+\texttt{return unaryOperator(\\
+\hspace*{2em}hasAnyOperatorName("++", "--"),\\
+\hspace*{2em}hasUnaryOperand(ignoringImpCasts(hasType(isInteger()))),\\
+\hspace*{2em}hasUnaryOperand(ignoringImpCasts(\\
+\hspace*{4em}expr().bind("arg"))))\\
+).bind("UnaryOp");}
+}
+\end{center}
+
+Unary operations will come in the form of a pre and post decrement and increment. The difference between increments and decrements will only be the checked macro to be used, however the order of the operation will make a big difference. For a post decrement, the value of the variable is evaluated before the operation takes place. This is essentially how a normal arithmetic operation will take place and thus the rewrite will be very similar to an assignment operation with on the RHS. Consider the following code that has a post-increment:
+
+\begin{center}
+\parbox{0.6\linewidth}{
+\texttt{unsigned int a = 1;\\
+++a;}
+}
+\end{center}
+
+This would be rewritten like so:
+\begin{center}
+\parbox{0.8\linewidth}{
+\texttt{unsigned int a = 1;\\
+(\{\\
+\hspace*{2em}unsigned int* dest = \&a;\\
+\hspace*{2em}if(ckd\_add(dest, *dest, 1)) \{\\
+\hspace*{4em}// Handle error\\
+\hspace*{2em}\}\\
+\hspace*{2em}*dest;\\
+\});}
+}
+\end{center}
+
+This approach is using the same technique where we preserve the side effect of the operation by collecting the pointer of the destination then dereferencing it as an operand.
+
+Now consider the following post-increment:
+\begin{center}
+\parbox{0.6\linewidth}{
+\texttt{int a = 1;\\
+a++;}
+}
+\end{center}
+
+In this case, we need to preserve the original value before the increment so that when it is ``evaluated" the value before the operation is returned. Using this approach we would get the following rewrite:
+
+\begin{center}
+\parbox{0.8\linewidth}{
+\texttt{int a = 1;\\
+(\{\\
+\hspace*{2em}int* dest = \&a;\\
+\hspace*{2em}int oldDest = *dest;\\
+\hspace*{2em}if(ckd\_add(dest, *dest, 1)) \{\\
+\hspace*{4em}// Handle error\\
+\hspace*{2em}\}\\
+\hspace*{2em}oldDest;\\
+\});}
+}
+\end{center}
+
+The check itself is written to use a single matcher, so a switch statement is used to differentiate between the different operations and perform the correct transformation like so:
+
+\begin{center}
+\parbox{0.95\linewidth}{
+\texttt{switch (MatchedExpr-\textgreater getOpcode()) \{\\
+\hspace*{2em}case clang::UO\_PreInc:\\
+\hspace*{2em}case clang::UO\_PreDec:\\
+\hspace*{4em}// handle fix for prefix\\
+\hspace*{4em}replacement = "(\{ " + argType + "* tmp = \&" + argSource + ";\textbackslash n";\\
+\hspace*{4em}replacement += "if(" + ckdFunc + "(tmp, *tmp, 1)) \{\textbackslash n";\\
+\hspace*{4em}replacement += HandleCode + "\textbackslash n\};";\\
+\hspace*{4em}replacement += "*tmp;\})";\\
+\hspace*{4em}break;\\[1em]
+\hspace*{2em}case clang::UO\_PostInc:\\
+\hspace*{2em}case clang::UO\_PostDec:\\
+\hspace*{4em}// handle fix for postfix\\
+\hspace*{4em}replacement = "(\{ " + argType + "* tmp = \&" + argSource + ";\textbackslash n";\\
+\hspace*{4em}replacement += argType + " oldTmp = *tmp;\textbackslash n";\\
+\hspace*{4em}replacement += "if(" + ckdFunc + "(tmp, *tmp, 1)) \{\textbackslash n";\\
+\hspace*{4em}replacement += HandleCode + "\textbackslash n\};";\\
+\hspace*{4em}replacement += "oldTmp;\})";\\
+\hspace*{4em}break;\\[1em]
+\hspace*{2em}default:\\
+\hspace*{4em}llvm::errs() \textless\textless "Unknown unary operator: " \\
+\hspace*{6em}\textless\textless MatchedExpr-\textgreater getOpcodeStr(MatchedExpr-\textgreater getOpcode()) \textless\textless "\textbackslash n";\\
+\hspace*{4em}return;\\
+\}
+}}
+\end{center}
+
+A complete copy of all the code written for this thesis, including the debug checks discussed later can be found in Appendix \ref{appendis:code} TODO
