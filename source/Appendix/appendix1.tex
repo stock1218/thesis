@@ -45,4 +45,15 @@ The rules for calculating a common real type for a mix-typed operation are as fo
             \end{itemize}
         \end{itemize}
     \end{itemize}
-\end{enumerate}
+\end{enumerate}`
+
+\chapter{Example Clang-tidy Config}
+\label{appendix:config}
+\begin{verbatim}
+Checks: `-*, modernize-use-checked-arithmetic'
+CheckOptions:
+  - key: modernize-use-checked-arithmetic.handleCode
+    value: `printf("ERROR\n");'
+  - key: modernize-use-checked-arithmetic.handleImport
+    value: `<stdio.h>'
+\end{verbatim}
