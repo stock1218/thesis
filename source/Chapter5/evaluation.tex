@@ -24,15 +24,15 @@ Finding answers to these questions will start with locating a set of targets to 
 
 \subsection{Selecting targets}
 
-A set of target codebases to rewrite should be selected to evaluate the effectiveness of the clang-tidy check. Due to the nature of the check and the questions being answered, the targets should have source available and have a test suite to ensure that the rewritten code does not introduce any bugs. That being said, three targets were selected. The first is a relatively popular strings library \texttt{str.h}, which contains many complex statements that should be able to test the rewrite quite broadly. The second is \texttt{Monocypher}, a cryptography library that also contains a lot of complex operations. Given how close cryptography and security are, having a checked cryptography library is something that may be desired. Finally, Binutils was rewritten using the check. Binutils is GNU's tool suite for operating on binary files and is often the subject of testing software for research. These targets should be sufficiently complex to measure the effectiveness of the clang-tidy check.
+A set of target codebases to rewrite should be selected to evaluate the effectiveness of the clang-tidy check. Due to the nature of the check and the questions being answered, the targets should have source available and have a test suite to ensure that the rewritten code does not introduce any bugs. That being said, three targets were selected. The first is a relatively popular strings library \textit{str.h}, which contains many complex statements that should be able to test the rewrite quite broadly. The second is \textit{Monocypher}, a cryptography library that also contains a lot of complex operations. Given how close cryptography and security are, having a checked cryptography library is something that may be desired. Finally, \textit{Binutils} was rewritten using the check. Binutils is GNU's tool suite for operating on binary files and is often the subject of testing software for research. These targets should be sufficiently complex to measure the effectiveness of the clang-tidy check.
 
 \subsection{Evaluating comprehensiveness}
 
 Comprehensiveness will be measured as how many arithmetic operations exist that can overflow verses how many operations are actually rewritten. Given the type restrictions of arguments passed to the checked arithmetic macros, it is expected that there should almost always be fewer rewrites than there are operations that may overflow.
 
-The main approach to collecting this information is to write two clang-tidy checks: one "debug" check that will match on all $+$, $-$, and $*$ operations (and their variations) without type restrictions, and the real check which will do the same only with narrowing matchers based on type restrictions.
+The main approach to collecting this information is to write three clang-tidy checks: one ``debug" check that will match on all $+$, $-$, and $*$ operations (and their variations) without type restrictions, another ``debug" check with with type restrictions, and the real check which will also have type restrictions.
 
-Note that there was some discussion about why even measure statements you cannot write given the current C23 macro definitions. This I believe highlights a major limitation of the current state of these macros, and yields a more accurate measurement of how much more secure a codebase is. However, a third check was also implemented that does have type restrictions which would measure "of the statements you can rewrite, how many get rewritten".
+Note that there was some discussion about why even measure statements you cannot write given the current C23 macro definitions. This I believe highlights a major limitation of the current state of these macros, and yields a more accurate measurement of how much more secure a codebase is. The debug check with type restrictions will measure ``of the statements you can rewrite, how many get rewritten".
 
 \subsection{Evaluating common exceptions}
 
@@ -40,7 +40,7 @@ Common exceptions will generally come down to the user experience: when a rewrit
 
 \subsection{Evaluating performance overhead}
 
-Measuring performance will generally take the shape of running a test suite on a target and noting the time, performing a full rewrite, then running the test suite again and recording the time. Note that each run of the test suite under a timer should be performed several times, then averaged to get a more accurate timing metric.
+Measuring performance will generally take the shape of running a test suite on a target and noting the time, performing a full rewrite, then running the test suite again and recording the time. Note that each run of the test suite under a timer should be performed ten times, then averaged to get a more accurate timing metric.
 
 \section{Results}
 
@@ -48,7 +48,7 @@ Below are comments on the findings on the aforementioned targets.
 
 \subsection{str.h}
 
-This was the first target to be rewritten and was relatively straight forward. The statistics on how the plugin performed can be found in \ref{tab:str.h}. The main metric for comprehensiveness is the fixes over potential replacements, which came out to 80.84\%. This is a relatively high number of replacements but it is not 100\%. We know that this is due to the type restrictions imposed on the checked arithmetic macros, since the Typed Debug Plugin detected the same number of potential replacements as the number of replacements actually performed. Other interesting metrics are the number of overlapping fixes, which sits at 2. When clang-tidy applies a fix, then encounters a fix on the same line, only one fix will be applied at a time. This is why the check may need to run multiple times. Since there are two overlapping fixes, we should expect to run the check at most 2 more times to get a complete rewrite.
+This was the first target to be rewritten and was relatively straight forward. The statistics on how the plugin performed can be found in \ref{tab:str.h}. The main metric for comprehensiveness is the fixes over potential replacements, which came out to 80.84\%. This is a relatively high number of replacements but it is not 100\%. We know that this is due to the type restrictions imposed on the checked arithmetic macros, since the typed debug plugin detected the same number of potential replacements as the number of replacements actually performed. Other interesting metrics are the number of overlapping fixes, which sits at 2. When clang-tidy applies a fix, then encounters a fix on the same line, only one fix will be applied at a time. This is why the check may need to run multiple times. Since there are two overlapping fixes, we should expect to run the check at most 2 more times to get a complete rewrite.
 
 \ref{tab:str.h} contains other interesting metrics like the distribution of different operations, which may give a better picture on the type of statements being rewritten and how much more coverage the clang-tidy check achieves by implementing rewrites for these statements.
 
@@ -94,7 +94,7 @@ This was the first target to be rewritten and was relatively straight forward. T
 
 The rewrite experience was very straight forward for this library even considering the complex arithmetic involved in string manipulation. The plugin was run on the source directory three times to rewrite all possible statements, however notably macro related rewrites were not going through. At the time of writing it is unknown why this is, however it is technically out of scope. Once the rewrites were performed and formatting was applied the library was built and test ran without error as if nothing had changed.
 
-TODO performance
+Performance was measured to come out to a 12\% performance hit on average when checks were in place. This seems like a small number, however this could be too large an overhead in some applications. Although not in scope, the reason for this performance overhead could be the way the rewrite was implemented and the implementation of the check macros themselves.
 
 \subsection{Monocypher}
 
@@ -102,7 +102,7 @@ The performance statistics for the rewrite of Monocypher can be found in \ref{ta
 
 The process of rewriting Monocypher was not without challenge. This is because many of the statements that were rewritten actually took advantage of unsigned integer wraparound. This became an issue when running the tests with the default rewrite handlers, which would trigger \texttt{assert(0)} when an overflow was detected. This was good and bad news: potential integer overflows and wraparounds were being detected, but many were false positives. The easiest thing to do was to run the tests and find which assert was being triggered, then comment out the assert statement. This however quickly became a time consuming process given how many statements had intended wraparound. To get the rewrite to still work, an empty handler function was defined in the clang-tidy config for the check to use. This resulted in the rewrite being performed, but if overflow was detected, nothing would happen and execution would continue. This highlights the important differences between overflow and wraparound, and that the plugin in it's current state does not differentiate between the two. This is partly due to the macros treating both overflow and wraparound the same, but the plugin could have an option to only match and rewrite signed arithmetic statements.
 
-TODO performance
+The performance measurement came out to about 4\%. This is a dramatic difference from the rewrite of str.h, and could be due to the way that measurements are being taken. If this is an accurate reading however, this would be an interesting avenue for further investigation.
 
 \begin{table}[ht]
 \centering
