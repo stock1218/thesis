@@ -45,23 +45,23 @@ rational for C99 standard: https://www.open-std.org/jtc1/sc22/wg14/www/C99Ration
  - wtf there's an official website? https://www.c-language.org/faq
 
 # Clang and LLVM
-https://discourse.llvm.org/t/reading-and-attaching-comments-to-clang-ast/47796
-https://llvm.org/docs/tutorial/MyFirstLanguageFrontend/
-https://stackoverflow.com/questions/46692246/source-to-source-transformation-with-clang-state-of-the-art
-https://clang.llvm.org/docs/ClangTransformerTutorial.html
-Talk about AST: https://www.youtube.com/watch?v=VqCkCDFLSsc
-https://jonasdevlieghere.com/post/understanding-the-clang-ast/
-How clang makes error messages: https://clang.llvm.org/diagnostics.html
-Clang plugins: https://clang.llvm.org/docs/ClangPlugins.html
-LibTooling: https://clang.llvm.org/docs/LibTooling.html
-CMU class slides: https://www.cs.cmu.edu/afs/cs/academic/class/15745-s15/public/lectures/L6-LLVM2-1up.pdf
-API stuff: https://llvm.org/docs/ProgrammersManual.html#the-isa-cast-and-dyn-cast-templates
-Building plugin on Windows: https://discourse.llvm.org/t/clang-wont-run-example-plugins-on-windows/57231/2
-old post on building PrintFunctionNames: https://discourse.llvm.org/t/building-the-example-plugin-printfunctionnames/53604
-Video on development on windows: https://www.youtube.com/watch?v=zlD2MpU7XIw
+(https://discourse.llvm.org/t/reading-and-attaching-comments-to-clang-ast/47796)[https://discourse.llvm.org/t/reading-and-attaching-comments-to-clang-ast/47796]
+(https://llvm.org/docs/tutorial/MyFirstLanguageFrontend/)[https://llvm.org/docs/tutorial/MyFirstLanguageFrontend/]
+(https://stackoverflow.com/questions/46692246/source-to-source-transformation-with-clang-state-of-the-art)[https://stackoverflow.com/questions/46692246/source-to-source-transformation-with-clang-state-of-the-art]
+(https://clang.llvm.org/docs/ClangTransformerTutorial.html)[https://clang.llvm.org/docs/ClangTransformerTutorial.html]
+(Talk about AST: https://www.youtube.com/watch?v=VqCkCDFLSsc)[Talk about AST: https://www.youtube.com/watch?v=VqCkCDFLSsc]
+(https://jonasdevlieghere.com/post/understanding-the-clang-ast/)[https://jonasdevlieghere.com/post/understanding-the-clang-ast/]
+(How clang makes error messages: https://clang.llvm.org/diagnostics.html)[How clang makes error messages: https://clang.llvm.org/diagnostics.html]
+(Clang plugins: https://clang.llvm.org/docs/ClangPlugins.html)[Clang plugins: https://clang.llvm.org/docs/ClangPlugins.html]
+(LibTooling: https://clang.llvm.org/docs/LibTooling.html)[LibTooling: https://clang.llvm.org/docs/LibTooling.html]
+(CMU class slides: https://www.cs.cmu.edu/afs/cs/academic/class/15745-s15/public/lectures/L6-LLVM2-1up.pdf)[CMU class slides: https://www.cs.cmu.edu/afs/cs/academic/class/15745-s15/public/lectures/L6-LLVM2-1up.pdf]
+(API stuff: https://llvm.org/docs/ProgrammersManual.html#the-isa-cast-and-dyn-cast-templates)[API stuff: https://llvm.org/docs/ProgrammersManual.html#the-isa-cast-and-dyn-cast-templates]
+(Building plugin on Windows: https://discourse.llvm.org/t/clang-wont-run-example-plugins-on-windows/57231/2)[Building plugin on Windows: https://discourse.llvm.org/t/clang-wont-run-example-plugins-on-windows/57231/2]
+(old post on building PrintFunctionNames: https://discourse.llvm.org/t/building-the-example-plugin-printfunctionnames/53604)[old post on building PrintFunctionNames: https://discourse.llvm.org/t/building-the-example-plugin-printfunctionnames/53604]
+(Video on development on windows: https://www.youtube.com/watch?v=zlD2MpU7XIw)[Video on development on windows: https://www.youtube.com/watch?v=zlD2MpU7XIw]
 
 # C++
-https://www.boost.org/doc/libs/1_76_0/libs/safe_numerics/doc/html/introduction.html
+(https://www.boost.org/doc/libs/1_76_0/libs/safe_numerics/doc/html/introduction.html)[https://www.boost.org/doc/libs/1_76_0/libs/safe_numerics/doc/html/introduction.html]
 
 # Microsoft
 [https://stackoverflow.com/questions/69565333/are-there-overflow-check-math-functions-for-msvc](https://stackoverflow.com/questions/69565333/are-there-overflow-check-math-functions-for-msvc)  
@@ -69,9 +69,7 @@ https://www.boost.org/doc/libs/1_76_0/libs/safe_numerics/doc/html/introduction.h
 [https://learn.microsoft.com/en-us/windows/win32/api/intsafe/](https://learn.microsoft.com/en-us/windows/win32/api/intsafe/)  
 [https://threadreaderapp.com/thread/1799457232607985698.html](https://threadreaderapp.com/thread/1799457232607985698.html)
 
-# Other Languages
-
 # Academic Papers
-[[Holistic Control-Flow Protection on Real-Time Embedded Systems with Kage]]
-[[InversOS Efficient Control-Flow Protection for AArch64 Applications with Privilege Inversion]]
+Holistic Control-Flow Protection on Real-Time Embedded Systems with Kage
+InversOS Efficient Control-Flow Protection for AArch64 Applications with Privilege Inversion
 
