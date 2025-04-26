@@ -146,13 +146,19 @@ The performance measurement came out to about 4\%. This is a dramatic difference
 
 \subsection{Binutils}
 
-Of the targets selected, Binutils is by a large margin the largest and most complex codebase to be rewritten. Nonetheless, a rewrite was successful and the statistics can be found in \ref{tab:binutils}.
+Of the targets selected, Binutils is by a large margin the largest and most complex codebase to be rewritten. As explained in the following subsection, the rewrite was not successfully built. Nonetheless, a rewrite was attempted and the statistics can be found in \ref{tab:binutils}.
 
 These statistics demonstrate how large and complex the codebase is, with 174 overlapping fixes and 50.11\% rewrite coverage. The overlapping fixes is much larger than the previous targets, and becomes a more serious issue when considering the amount of time clang-tidy ran to achieve a single rewrite pass: 5 minutes. If 174 rewrites are required to ensure all statements are rewritten, this would take 14 hours to complete. This is a worse case scenario, however even a fraction of this time is not insignificant. The lower number of expressions rewritten demonstrates how much the impact these type restrictions have on the rewrite, which is at 100\% for expressions with supported types.
 
-TODO rewrite experience
+The rewrite itself was not successful however. There were several cases that caused the tool to break, these included issues with clang-format, variable names, and cases where array accesses had arithmetic expressions in them.
 
-TODO performance
+The issue with clang-format was that Binutils expects a very specific ordering of header file imports. Since clang-format was being run each time changes were made, the ordering of imports was being changed which caused a number of build issues.
+
+Variable names became an issue, where temporary variables like \texttt{dest} or \texttt{argOne} were shadowed. The compiler complained about these, and they were too numerous to change by hand. The solution to this is to generate random temporary names, however this was not implemented in the time alloted.
+
+Finally, there were cases where array indexes where being modified. I believe this was an issue with selecting types, where an array subscript was given the type \texttt{char} when it should have been some other integer type. This is likely a bug in the AST matcher.
+
+No performance metrics were collected since no binary was produced to run performance metrics on.
 
 \begin{table}[ht]
 \centering
@@ -194,4 +200,4 @@ TODO performance
 \end{tabular}
 \end{table}
 
-This chapter demonstrates that while this approach does work in some capacity, there are a number of pitfalls related to type restrictions as well as the time it takes to actually perform the rewrites. TODO comments about rewrites and performance
+This chapter demonstrates that while this approach does work in some capacity, however there are a number of issues related the implementation, type restrictions, the time it takes to actually perform the rewrites. Although the rewrite of Binutils was not successful, the success of the other two targets should demonstrate the applicability of this approach when done right. Furthermore, metrics on how type restrictions affect the theoretical capabilities of such a tool were collected.
