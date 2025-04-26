@@ -1,4 +1,12 @@
 \chapter{Introduction}
 \label{sec:intro}
 
-TBD
+This thesis would like to explore the idea of using automated techniques for modernizing old C codebases. C standards are published every so often, and can include a number of useful additions that developers may want to take advantage of. This may be the case for C's new checked arithmetic macros. These macros are designed to perform and check arithmetic operations so that bugs related to integer safety are caught and handled at runtime.
+
+The main issue faced by a lot of developers in the real world is that it may take a long time to actually rewrite their codebases to utilize, say, checked arithmetic macros. Modernizing codebases is often plagued by this issue, which may motivate developers to just rewrite their codebases completely. Doing a complete rewrite, especially in a more modern language, has a lot of benefits. However, doing this is just not practical and often misguided. Specifically with integer arithmetic, overflows and wraparounds still occur in modern languages. Thus, it may be more beneficial to perform an automatic rewrite that uses these macros before incurring the cost of a completely new implementation.
+
+It is in the interest of both these developers and society as a whole to adopt features, especially ones that make code more secure. This is the justification for this thesis, which aims at finding a method for automatically modernizing codebases to use checked arithmetic. Due to the nature of these new macros, a number of challenges need to be overcome to actually be successful.
+
+The main issue related to rewriting statements is the issue of intermediate types. When an arithmetic expression is written, the programmer must use intermediate variables to store and check for overflow. This is simply due to the construction of these macros. Because integer overflow and wraparound depend on the width of the variables involved, selecting the right types of the intermediate variables is imperative to successfully rewriting these statements correctly. Another issue is related to how the macros only operate on a subset of the integer types and operations. Thus, not all operations that can overflow can be rewritten using the checked arithmetic macros.
+
+Finding an automatic method for rewriting statements that tackles these main issues will open the door for developers to harness these new language features until more robust solutions are presented to them in the future.
