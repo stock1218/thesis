@@ -7,13 +7,13 @@ This chapter is related to the evaluation of the proposed design and subsequent 
 
 The following are a set of research questions that are posed as part of this evaluation.
 
-\subsection{\textbf{RQ1: How comprehensive is the rewrite?}}
+\subsubsection{\textbf{RQ1: How comprehensive is the rewrite?}}
 Fundamentally there is a question of how many expressions can the clang-tidy check rewrite relative to the total number of operations that can overflow. This is essentially measuring how much more secure a rewrite is given each rewrite is performed correctly. The implications of this will determine how effective or ineffective such a tool would be. An interesting detail here is figuring out how many rewrites are not possible given the current checked arithmetic macros supplied by the C23 standard.
 
-\subsection{\textbf{RQ2: What are common reasons lines are omitted from rewrites?}}
+\subsubsection{\textbf{RQ2: What are common reasons lines are omitted from rewrites?}}
 As with any static analysis tool, the issue of false positives and false negatives will be an important factor in how useful such a tool will be. This question will need to be investigated to determine how practical it is to perform rewrites without much manual intervention (i.e. commenting certain lines so they are exempt). Finding common reasons for exceptions is also a detail this question is trying to solve, which may reveal further limitations.
 
-\subsection{\textbf{RQ3: What is the performance overhead of using checked arithmetic?}}
+\subsubsection{\textbf{RQ3: What is the performance overhead of using checked arithmetic?}}
 Once a tool or library is rewritten using checked arithmetic, what kind of performance overhead does this induce at runtime? As with the previous questions, this detail can be an important factor as to how practical such a tool is. This is especially true in safety critical systems, which often run as a real-time operating system and must meet certain performance requirements.
 
 With these questions now defined, we move on to the methodology for answering said questions.
