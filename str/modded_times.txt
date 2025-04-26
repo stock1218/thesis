@@ -1,0 +1,50 @@
+
+real	0.28s
+user	0.22s
+sys	0.05s
+cpu	94%
+
+real	0.30s
+user	0.19s
+sys	0.10s
+cpu	95%
+
+real	0.27s
+user	0.19s
+sys	0.07s
+cpu	94%
+
+real	0.27s
+user	0.18s
+sys	0.08s
+cpu	94%
+
+real	0.28s
+user	0.21s
+sys	0.06s
+cpu	94%
+
+real	0.28s
+user	0.18s
+sys	0.08s
+cpu	95%
+
+real	0.30s
+user	0.23s
+sys	0.06s
+cpu	94%
+
+real	0.30s
+user	0.20s
+sys	0.09s
+cpu	95%
+
+real	0.27s
+user	0.18s
+sys	0.07s
+cpu	94%
+
+real	0.29s
+user	0.21s
+sys	0.07s
+cpu	94%
