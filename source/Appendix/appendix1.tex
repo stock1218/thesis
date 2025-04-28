@@ -57,3 +57,577 @@ CheckOptions:
   - key: modernize-use-checked-arithmetic.handleImport
     value: `<stdio.h>'
 \end{verbatim}
+
+\chapter{Code for clang-tidy check}
+\label{appendix:code}
+\texttt{UseCheckedArithmeticCheck.cpp}:
+{\scriptsize
+
+\begin{verbatim}
+#include "UseCheckedArithmeticCheck.h"
+#include "../utils/IncludeInserter.h"
+#include "clang/AST/ASTContext.h"
+#include "clang/ASTMatchers/ASTMatchFinder.h"
+#include "clang/Lex/Lexer.h"
+
+using namespace clang::ast_matchers;
+
+namespace clang::tidy::modernize {
+
+void UseCheckedArithmeticCheck::registerPPCallbacks(
+    const SourceManager &SM, Preprocessor *PP, Preprocessor *ModuleExpanderPP) {
+  IncludeInserter.registerPreprocessor(PP);
+}
+
+StatementMatcher makeCastNonAssignmentMatcher() {
+    return binaryOperator(hasAnyOperatorName("+", "-", "*"),
+                          hasParent(expr(hasType(isInteger()), unless(hasType(isConstQualified()))).bind("parent-expr")),
+                          hasLHS(ignoringImpCasts(hasType(isInteger()))),
+                          hasLHS(ignoringImpCasts(expr().bind("argOne"))),
+                          hasRHS(ignoringImpCasts(hasType(isInteger()))),
+                          hasRHS(ignoringImpCasts(expr().bind("argTwo"))))
+           .bind("Non-AssignmentOp");
+
+}
+
+StatementMatcher makeGenericNonAssignmentMatcher() {
+    return binaryOperator(hasAnyOperatorName("+", "-", "*"),
+                          hasLHS(ignoringImpCasts(hasType(isInteger()))),
+                          hasLHS(ignoringImpCasts(expr().bind("argOne"))),
+                          hasRHS(ignoringImpCasts(hasType(isInteger()))),
+                          hasRHS(ignoringImpCasts(expr().bind("argTwo"))))
+           .bind("Non-AssignmentOp");
+
+}
+
+StatementMatcher makeUnaryMatcher() {
+  return unaryOperator(hasAnyOperatorName("++", "--"),
+                       hasUnaryOperand(ignoringImpCasts(hasType(isInteger()))),
+                       hasUnaryOperand(ignoringImpCasts(anyOf(
+                           expr().bind("arg"), integerLiteral().bind("arg")))))
+      .bind("UnaryOp");
+}
+
+StatementMatcher makeAssignmentMatcher() {
+  return binaryOperation(
+             hasAnyOperatorName("+=", "-=", "*="), isAssignmentOperator(),
+             hasLHS(ignoringImpCasts(hasType(isInteger()))),
+             hasLHS(ignoringImpCasts(
+                 anyOf(expr().bind("dest"), integerLiteral().bind("dest")))),
+             hasRHS(ignoringImpCasts(hasType(isInteger()))),
+             hasRHS(ignoringImpCasts(
+                 anyOf(expr().bind("arg"), integerLiteral().bind("arg")))))
+      .bind("AssignmentOp");
+}
+
+std::string getCkdFunction(llvm::StringRef opStr) {
+  if (opStr == "+" || opStr == "++" || opStr == "+=") {
+    return "ckd_add";
+  } else if (opStr == "-" || opStr == "--" || opStr == "-=") {
+    return "ckd_sub";
+  } else if (opStr == "*" || opStr == "*=") {
+    return "ckd_mul";
+  } else {
+    llvm::errs() << "Unknown operation to convert: " << opStr << "\n";
+    return "";
+  }
+}
+
+void UseCheckedArithmeticCheck::registerMatchers(MatchFinder *Finder) {
+  Finder->addMatcher(traverse(TK_AsIs, makeCastNonAssignmentMatcher()), this);
+  Finder->addMatcher(traverse(TK_AsIs, makeGenericNonAssignmentMatcher()), this);
+  Finder->addMatcher(traverse(TK_AsIs, makeAssignmentMatcher()), this);
+  Finder->addMatcher(traverse(TK_AsIs, makeUnaryMatcher()), this);
+}
+
+std::string getExprSourceString(const Expr *expr, const SourceManager &sm,
+                                const LangOptions &langOpts) {
+  const auto range = expr->getSourceRange();
+
+  const auto start = sm.getSpellingLoc(range.getBegin());
+  const auto end = sm.getSpellingLoc(range.getEnd());
+
+  return Lexer::getSourceText(CharSourceRange::getTokenRange(start, end), sm,
+                              langOpts)
+      .str();
+}
+
+void UseCheckedArithmeticCheck::fixAssignmentOp(
+    const MatchFinder::MatchResult &Result) {
+  const auto *MatchedExpr =
+      Result.Nodes.getNodeAs<BinaryOperator>("AssignmentOp");
+
+  const auto resultType = MatchedExpr->getType().getAsString();
+
+  const SourceManager &sm = *Result.SourceManager;
+  const LangOptions &langOpts = Result.Context->getLangOpts();
+  std::string destSource, argSource;
+  std::string destType, argType;
+
+  const clang::Expr *dest;
+  const clang::Expr *arg;
+
+  // If it's an expression
+  if (Result.Nodes.getNodeAs<Expr>("dest")) {
+    dest = Result.Nodes.getNodeAs<Expr>("dest");
+  } else { // if it's an integer literal
+    dest = Result.Nodes.getNodeAs<IntegerLiteral>("dest");
+  }
+
+  // Same logic for argTwo
+  if (Result.Nodes.getNodeAs<Expr>("arg")) {
+    arg = Result.Nodes.getNodeAs<Expr>("arg");
+  } else {
+    arg = Result.Nodes.getNodeAs<IntegerLiteral>("arg");
+  }
+
+  // Get appropriate checked function
+  const std::string ckdFunc = getCkdFunction(MatchedExpr->getOpcodeStr());
+
+  if (ckdFunc == "") {
+    llvm::errs() << "Error converting operation:" << MatchedExpr->getOpcodeStr()
+                 << "\n";
+    return;
+  }
+
+  // Extract the source for dest and arg
+  destSource = getExprSourceString(dest, sm, langOpts);
+  argSource = getExprSourceString(arg, sm, langOpts);
+
+  // Get types of dest and source
+  destType = dest->getType().getAsString();
+  argType = arg->getType().getAsString();
+
+
+  auto replacement = "({ " + destType + "* dest = " + "&" + destSource + ";\n";
+  replacement += argType + " arg = " + argSource + ";\n";
+  replacement += "if(" + ckdFunc + "(dest, *dest, arg)) {";
+  replacement += HandleCode + "\n};";
+  replacement += "*dest;})";
+
+  DiagnosticBuilder Diag =
+      diag(MatchedExpr->getBeginLoc(), "assignment operation can be rewritten to use checked arithmetic");
+
+  Diag << FixItHint::CreateReplacement(MatchedExpr->getSourceRange(),
+                                       replacement);
+
+  Diag << IncludeInserter.createIncludeInsertion(
+      Result.Context->getSourceManager().getFileID(MatchedExpr->getBeginLoc()),
+      "<stdckdint.h>");
+  Diag << IncludeInserter.createIncludeInsertion(
+      Result.Context->getSourceManager().getFileID(MatchedExpr->getBeginLoc()),
+      HandleImport);
+  return;
+}
+
+void UseCheckedArithmeticCheck::fixUnaryOp(
+    const MatchFinder::MatchResult &Result) {
+  const auto *MatchedExpr = Result.Nodes.getNodeAs<UnaryOperator>("UnaryOp");
+
+  const SourceManager &sm = *Result.SourceManager;
+  const LangOptions &langOpts = Result.Context->getLangOpts();
+  std::string argSource, argType;
+
+  const clang::Expr *arg = Result.Nodes.getNodeAs<Expr>("arg");
+
+  // Extract the source with this expression
+  argSource = getExprSourceString(arg, sm, langOpts);
+  argType = arg->getType().getAsString();
+
+  const std::string ckdFunc =
+      getCkdFunction(MatchedExpr->getOpcodeStr(MatchedExpr->getOpcode()));
+
+  if (ckdFunc == "") {
+    llvm::errs() << "Error converting operation.\n";
+    return;
+  }
+
+  std::string replacement;
+
+  switch (MatchedExpr->getOpcode()) {
+  case clang::UO_PreInc:
+  case clang::UO_PreDec:
+    // handle fix for prefix
+    replacement = "({ " + argType + "* tmp = &" + argSource + ";\n";
+    replacement += "if(" + ckdFunc + "(tmp, *tmp, 1)) {\n";
+    replacement += HandleCode + "\n};";
+    replacement += "*tmp;})";
+
+    break;
+
+  case clang::UO_PostInc:
+  case clang::UO_PostDec:
+    // handle fix for postfix
+    replacement = "({ " + argType + "* tmp = &" + argSource + ";\n";
+    replacement += argType + " oldTmp = *tmp;\n";
+    replacement += "if(" + ckdFunc + "(tmp, *tmp, 1)) {\n";
+    replacement += HandleCode + "\n};";
+    replacement += "oldTmp;})";
+
+    break;
+
+  default:
+    llvm::errs() << "Unknown unary operator: "
+                 << MatchedExpr->getOpcodeStr(MatchedExpr->getOpcode()) << "\n";
+    return;
+  }
+
+  DiagnosticBuilder Diag =
+      diag(MatchedExpr->getBeginLoc(), "unary operation can be rewritten to use checked arithmetic");
+  Diag << FixItHint::CreateReplacement(MatchedExpr->getSourceRange(),
+                                       replacement);
+
+  Diag << IncludeInserter.createIncludeInsertion(
+      Result.Context->getSourceManager().getFileID(MatchedExpr->getBeginLoc()),
+      "<stdckdint.h>");
+  Diag << IncludeInserter.createIncludeInsertion(
+      Result.Context->getSourceManager().getFileID(MatchedExpr->getBeginLoc()),
+      HandleImport);
+  return;
+}
+
+void UseCheckedArithmeticCheck::fixNonAssignmentOp(
+    const MatchFinder::MatchResult &Result) {
+  const auto *MatchedExpr =
+      Result.Nodes.getNodeAs<BinaryOperator>("Non-AssignmentOp");
+
+  std::string resultType;
+
+  // If there is a cast above this node we need to use that type as the dest
+  if(Result.Nodes.getNodeAs<Expr>("parent-expr")) {
+    const auto result = Result.Nodes.getNodeAs<Expr>("parent-expr");
+    resultType = result->getType().getAsString();
+
+  } else { // otherwise we can just use the type it's going into
+      resultType = MatchedExpr->getType().getAsString();
+  }
+
+  const SourceManager &sm = *Result.SourceManager;
+  const LangOptions &langOpts = Result.Context->getLangOpts();
+  std::string argOneSource, argTwoSource;
+  std::string argOneType, argTwoType;
+
+  const clang::Expr *argOne;
+  const clang::Expr *argTwo;
+
+  argOne = Result.Nodes.getNodeAs<Expr>("argOne");
+  argTwo = Result.Nodes.getNodeAs<Expr>("argTwo");
+
+  // Extract the source with this expression
+  argOneSource = getExprSourceString(argOne, sm, langOpts);
+  argTwoSource = getExprSourceString(argTwo, sm, langOpts);
+
+  argOneType = argOne->getType().getAsString();
+  argTwoType = argTwo->getType().getAsString();
+
+  const std::string ckdFunc = getCkdFunction(MatchedExpr->getOpcodeStr());
+
+  if (ckdFunc == "") {
+    llvm::errs() << "Error converting operation:" << MatchedExpr->getOpcodeStr()
+                 << "\n";
+    return;
+  }
+
+  auto replacement = "({ " + resultType + " dest;\n";
+  replacement += argOneType + " argOne = " + argOneSource + ";\n";
+  replacement += argTwoType + " argTwo = " + argTwoSource + ";\n";
+  replacement += "if(" + ckdFunc + "(&dest, argOne, argTwo)) {";
+  replacement += HandleCode + "\n};";
+  replacement += "dest;})";
+
+  DiagnosticBuilder Diag =
+      diag(MatchedExpr->getBeginLoc(), "non-assignment operation can be rewritten to use checked arithmetic");
+  Diag << FixItHint::CreateReplacement(MatchedExpr->getSourceRange(),
+                                       replacement);
+
+  Diag << IncludeInserter.createIncludeInsertion(
+      Result.Context->getSourceManager().getFileID(MatchedExpr->getBeginLoc()),
+      "<stdckdint.h>");
+  Diag << IncludeInserter.createIncludeInsertion(
+      Result.Context->getSourceManager().getFileID(MatchedExpr->getBeginLoc()),
+      HandleImport);
+  return;
+}
+
+void UseCheckedArithmeticCheck::check(const MatchFinder::MatchResult &Result) {
+
+  if (HandleImport == "__unset") {
+    HandleImport = "<assert.h>";
+  }
+
+  if (HandleCode == "__unset") {
+    HandleCode = "assert(0);";
+  }
+
+  if (Result.Nodes.getNodeAs<BinaryOperator>("Non-AssignmentOp")) {
+    fixNonAssignmentOp(Result);
+  } else if (Result.Nodes.getNodeAs<BinaryOperator>("AssignmentOp")) {
+    fixAssignmentOp(Result);
+  } else if (Result.Nodes.getNodeAs<UnaryOperator>("UnaryOp")) {
+    fixUnaryOp(Result);
+  }
+
+  return;
+}
+} // namespace clang::tidy::modernize
+
+\end{verbatim}
+}
+
+\texttt{UseCheckedArithmetic.h}:
+{\scriptsize
+\begin{verbatim}
+#ifndef LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_MODERNIZE_USE_CHECKED_ARITHMETIC_H
+#define LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_MODERNIZE_USE_CHECKED_ARITHMETIC_H
+
+#include "../ClangTidyCheck.h"
+#include "../utils/IncludeInserter.h"
+
+namespace clang::tidy::modernize {
+
+/// This check will warn on arithemtic expressions that can overflow and suggest
+/// using the C23 ckd_* macro
+///
+class UseCheckedArithmeticCheck : public ClangTidyCheck {
+public:
+  UseCheckedArithmeticCheck(StringRef Name, ClangTidyContext *Context)
+      : ClangTidyCheck(Name, Context),
+        HandleImport(Options.get("handleImport", "__unset")),
+        HandleCode(Options.get("handleCode", "__unset")),
+        IncludeInserter(Options.getLocalOrGlobal("IncludeStyle",
+                                                 utils::IncludeSorter::IS_LLVM),
+                        areDiagsSelfContained()) {}
+  /* TODO maybe specify later
+  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+    llvm::outs() << "Called lang supported";
+    return LangOpts.C23;
+  }
+  */
+
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override {
+    Options.store(Opts, "handleImport", HandleImport);
+    Options.store(Opts, "handleCode", HandleCode);
+  }
+
+  void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
+                           Preprocessor *ModuleExpanderPP) override;
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+
+private:
+  utils::IncludeInserter IncludeInserter;
+  std::string HandleImport;
+  std::string HandleCode;
+  void fixNonAssignmentOp(const ast_matchers::MatchFinder::MatchResult &Result);
+  void fixAssignmentOp(const ast_matchers::MatchFinder::MatchResult &Result);
+  void fixUnaryOp(const ast_matchers::MatchFinder::MatchResult &Result);
+};
+
+} // namespace clang::tidy::modernize
+
+#endif // LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_MODERNIZE_USE_CHECKED_ARITHMETIC_H
+
+\end{verbatim}
+
+}
+
+
+\texttt{UseCheckedArithmeticDebugCheck.h}:
+{\scriptsize
+\begin{verbatim}
+//===--- UseCheckedArithmeticDebugCheck.h - clang-tidy ----------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
+
+#ifndef LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_MODERNIZE_USECHECKEDARITHMETICDEBUGCHECK_H
+#define LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_MODERNIZE_USECHECKEDARITHMETICDEBUGCHECK_H
+
+#include "../ClangTidyCheck.h"
+
+namespace clang::tidy::modernize {
+
+/// FIXME: Write a short description.
+///
+/// For the user-facing documentation see:
+/// http://clang.llvm.org/extra/clang-tidy/checks/modernize/UseCheckedArithmeticDebug.html
+class UseCheckedArithmeticDebugCheck : public ClangTidyCheck {
+public:
+  UseCheckedArithmeticDebugCheck(StringRef Name, ClangTidyContext *Context)
+      : ClangTidyCheck(Name, Context) {}
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+};
+
+} // namespace clang::tidy::modernize
+
+#endif // LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_MODERNIZE_USECHECKEDARITHMETICDEBUGCHECK_H
+
+\end{verbatim}
+
+}
+
+\texttt{UseCheckedArithmeticDebugCheck.cpp}:
+{\scriptsize
+\begin{verbatim}
+//===--- UsecheckedarithmeticdebugCheck.cpp - clang-tidy ------------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
+
+#include "UseCheckedArithmeticDebugCheck.h"
+#include "clang/ASTMatchers/ASTMatchFinder.h"
+
+using namespace clang::ast_matchers;
+
+namespace clang::tidy::modernize {
+
+void UseCheckedArithmeticDebugCheck::registerMatchers(MatchFinder *Finder) {
+  // Matcher for binops
+  Finder->addMatcher(binaryOperation(hasAnyOperatorName("+", "-", "*"))
+                         // hasLHS(ignoringImpCasts(hasType(isInteger()))),
+                         // hasRHS(ignoringImpCasts(hasType(isInteger()))))
+                         .bind("Non-AssignmentOp"),
+                     this);
+
+  // Matcher for unary ops
+  Finder->addMatcher(
+      unaryOperator(hasAnyOperatorName("++", "--")).bind("UnaryOp"), this);
+
+  // Matcher for compound assignment
+  Finder->addMatcher(binaryOperation(isAssignmentOperator(),
+                                     hasAnyOperatorName("+=", "-=", "*="))
+                         .bind("AssignmentOp"),
+                     this);
+}
+
+void UseCheckedArithmeticDebugCheck::check(
+    const MatchFinder::MatchResult &Result) {
+  // FIXME: Add callback implementation.
+  if(Result.Nodes.getNodeAs<Expr>("Non-AssignmentOp")) {
+	  const auto *MatchedOperation = Result.Nodes.getNodeAs<Expr>("Non-AssignmentOp");
+	  diag(MatchedOperation->getBeginLoc(), "Potential checked operation (non-assignment operation)");
+  } else if(Result.Nodes.getNodeAs<Expr>("AssignmentOp")) {
+	  const auto *MatchedOperation = Result.Nodes.getNodeAs<Expr>("AssignmentOp");
+	  diag(MatchedOperation->getBeginLoc(), "Potential checked operation (assignment operation)");
+  } else if(Result.Nodes.getNodeAs<Expr>("UnaryOp")) {
+	  const auto *MatchedOperation = Result.Nodes.getNodeAs<Expr>("UnaryOp");
+	  diag(MatchedOperation->getBeginLoc(), "Potential checked operation (unary operation)");
+  }
+}
+
+} // namespace clang::tidy::modernize
+\end{verbatim}
+}
+
+\texttt{UseCheckedArithmeticTypedDebugCheck.h}
+{\scriptsize
+\begin{verbatim}
+//===--- UseCheckedArithmeticTypedDebugCheck.h - clang-tidy ----------*- C++ -*-===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
+
+#ifndef LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_MODERNIZE_USECHECKEDARITHMETICTYPEDDEBUGCHECK_H
+#define LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_MODERNIZE_USECHECKEDARITHMETICTYPEDDEBUGCHECK_H
+
+#include "../ClangTidyCheck.h"
+
+namespace clang::tidy::modernize {
+
+/// FIXME: Write a short description.
+///
+/// For the user-facing documentation see:
+/// http://clang.llvm.org/extra/clang-tidy/checks/modernize/UseCheckedArithmeticTypedDebug.html
+class UseCheckedArithmeticTypedDebugCheck : public ClangTidyCheck {
+public:
+  UseCheckedArithmeticTypedDebugCheck(StringRef Name, ClangTidyContext *Context)
+      : ClangTidyCheck(Name, Context) {}
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+};
+
+} // namespace clang::tidy::modernize
+
+#endif // LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_MODERNIZE_USECHECKEDARITHMETICTYPEDDEBUGCHECK_H
+
+\end{verbatim}
+}
+
+\texttt{UseCheckedArithmeticTypedDebugCheck.cpp}:
+{\scriptsize
+\begin{verbatim}
+//===--- UseCheckedArithmeticTyppedDebugCheck.cpp - clang-tidy ------------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
+
+#include "UseCheckedArithmeticTypedDebugCheck.h"
+#include "clang/ASTMatchers/ASTMatchFinder.h"
+
+using namespace clang::ast_matchers;
+
+namespace clang::tidy::modernize {
+
+void UseCheckedArithmeticTypedDebugCheck::registerMatchers(MatchFinder *Finder) {
+    Finder->addMatcher(
+        binaryOperator(hasAnyOperatorName("+", "-", "*"),
+                          hasParent(expr(hasType(isInteger()), unless(hasType(isConstQualified())))),
+                          hasLHS(ignoringImpCasts(hasType(isInteger()))),
+                          hasRHS(ignoringImpCasts(hasType(isInteger()))))
+           .bind("Non-AssignmentOp"),
+        this);
+
+
+    Finder->addMatcher(
+        binaryOperator(hasAnyOperatorName("+", "-", "*"),
+                          hasLHS(ignoringImpCasts(hasType(isInteger()))),
+                          hasRHS(ignoringImpCasts(hasType(isInteger()))))
+           .bind("Non-AssignmentOp"),
+        this);
+
+    Finder->addMatcher(
+        unaryOperator(hasAnyOperatorName("++", "--"),
+                       hasUnaryOperand(ignoringImpCasts(hasType(isInteger()))))
+      .bind("UnaryOp"), this);
+
+    Finder->addMatcher(binaryOperation(
+             hasAnyOperatorName("+=", "-=", "*="), isAssignmentOperator(),
+             hasLHS(ignoringImpCasts(hasType(isInteger()))),
+             hasRHS(ignoringImpCasts(hasType(isInteger()))))
+      .bind("AssignmentOp"), this);
+
+}
+
+void UseCheckedArithmeticTypedDebugCheck::check(
+    const MatchFinder::MatchResult &Result) {
+  // FIXME: Add callback implementation.
+  if(Result.Nodes.getNodeAs<Expr>("Non-AssignmentOp")) {
+	  const auto *MatchedOperation = Result.Nodes.getNodeAs<Expr>("Non-AssignmentOp");
+	  diag(MatchedOperation->getBeginLoc(), "Potential checked operation (non-assignment operation)");
+  } else if(Result.Nodes.getNodeAs<Expr>("AssignmentOp")) {
+	  const auto *MatchedOperation = Result.Nodes.getNodeAs<Expr>("AssignmentOp");
+	  diag(MatchedOperation->getBeginLoc(), "Potential checked operation (assignment operation)");
+  } else if(Result.Nodes.getNodeAs<Expr>("UnaryOp")) {
+	  const auto *MatchedOperation = Result.Nodes.getNodeAs<Expr>("UnaryOp");
+	  diag(MatchedOperation->getBeginLoc(), "Potential checked operation (unary operation)");
+  }
+}
+
+} // namespace clang::tidy::modernize
+ 
+\end{verbatim}
+
+}

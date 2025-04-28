@@ -22,11 +22,11 @@ In many cases, it is unacceptable to have a software fault. This would be the ca
 
 \section{Integer Safety}
 
-The topic of integer safety has a long and interesting history involving a number of different systems. In this section we will discuss that integer safety is, how violations of integer safety occur, and some real world examples of bugs caused by integer overflow.
+The topic of integer safety has a long and interesting history involving a number of different systems. In this section we will discuss what integer safety is, how violations of integer safety occur, and some real world examples of bugs caused by integer overflow.
 
 \subsection{Integer Representation}
 
-When a integer is declared and initialized, it's underlying value will be represented by a collection of bits. The C standard defines a number of different integer types and can be broken into two different categories: unsigned and signed integers. Unsigned integers represent numbers using raw binary numbers ranging from 0 to $2^{\text{width}(\text{type})} - 1$ where $width(type)$ is the number of bits that represent the type of the integer. Standard unsigned integer types and their widths on x86-64 using the LP64 model include \texttt{unsigned char} (8 bits), \texttt{unsigned short int} (16 bits), \texttt{unsigned int} (32 bits), \texttt{unsigned long int} (64 bits), \texttt{unsigned long long int} (64 bits) \cite{LP64}.
+When an integer is declared and initialized, it's underlying value will be represented by a collection of bits. The C standard defines a number of different integer types and can be broken into two different categories: unsigned and signed integers. Unsigned integers represent numbers using raw binary numbers ranging from 0 to $2^{\text{width}(\text{type})} - 1$ where $width(type)$ is the number of bits that represent the type of the integer. Standard unsigned integer types and their widths on x86-64 using the LP64 model include \texttt{unsigned char} (8 bits), \texttt{unsigned short int} (16 bits), \texttt{unsigned int} (32 bits), \texttt{unsigned long int} (64 bits), \texttt{unsigned long long int} (64 bits) \cite{LP64}.
 
 Signed integers are meant to store positive and negative numbers, something you cannot do using an unsigned integer. Standard signed integer types and their widths on x86-64 using the LP64 model include \texttt{signed char} (8 bits), \texttt{short int} (16 bits), \texttt{int} (32 bits), \texttt{long int} (64 bits), \texttt{long long int} (64 bits). The C standard also allows compilers to represent signed integers in three different ways: sign and magnitude, one's complement, and two's complement \cite{c_standard}. Virtually all modern compilers will represent signed integers using two's complement, so only the implications of this representation will be discussed. Two's complement works by treating the most significant bit as a \textit{sign bit}, then giving it a weight of $-2^{N - 1}$ when calculating the decimal value of each bit. Two's complement is the most popular representation of integers because of properties it has to make arithmetic operations easy and does not have issues like a positive and negative 0 representation like one's complement. One important detail however, is the most negative value that two's complement cannot be represented as a positive number using the same number of bits due to the asymmetry of two's complement.
 
@@ -38,7 +38,7 @@ Interestingly, this behavior is considered defined behavior in the C language sp
 
 \subsection{Integer Overflow}
 
-An \textit{integer overflow} occurs when an operation involving a \textit{signed integer} results in a value that is too large or small to be represented in the resultant type. The C standard considers integer overflow undefined behavior, which has a number of implications as mentioned earlier in this chapter. Operations that can cause overflow are listed in table 2.1.
+An \textit{integer overflow} occurs when an operation involving a \textit{signed integer} results in a value that is too large or small to be represented in the resultant type. The C standard considers integer overflow undefined behavior, which has a number of implications as mentioned earlier in this chapter. Operations that can cause overflow are listed in Table 2.1.
 \begin{table}[h!]
 \centering
 \begin{tabular}{|c|l|}
@@ -150,7 +150,7 @@ When a mix-typed statement is written, the compiler will need to calculate the \
 
 As mentioned in the integer promotion subsection, default argument promotions can also trigger integer promotion. This occurs when the arguments are passed to a variadic function and are matched to the ellipsis parameter.
 
-Now will these concepts explained, it is important to understand how these rules can be a source of error. The implication is that these casts can result in a loss of value (i.e. conversion where the magnitude of original value cannot be preserved) or a loss of sign (i.e. converting from a signed value to an unsigned value will mean negative values are no longer represented).
+Now with these concepts explained, it is important to understand how these rules can be a source of error. The implication is that these casts can result in a loss of value (i.e. conversion where the magnitude of original value cannot be preserved) or a loss of sign (i.e. converting from a signed value to an unsigned value will mean negative values are no longer represented).
 
 Consider the following example \cite{secure_coding} :
 
@@ -168,7 +168,7 @@ In the code above, the signed char \texttt{c} is compared to signed int \texttt{
 
 \subsection{Case Studies}
 
-There have been a number of real-world bugs that have been caused by integer overflow and wraparound. One of the most famous examples is the Ariane 5 rocket disaster. The disaster was caused by an integer overflow that resulted erroneous horizontal velocity values, leading to the rocket to self-destruct \cite{a5}. The damage exceeded \$370 million dollars \cite{a5_cost}.
+There have been a number of real-world bugs that have been caused by integer overflow and wraparound. One of the most famous examples is the Ariane 5 rocket disaster. The disaster was caused by an integer overflow that resulted in erroneous horizontal velocity values, leading to the rocket to self-destruct \cite{a5}. The damage exceeded \$370 million dollars \cite{a5_cost}.
 
 Another prominent example was the Therac-25 radiation therapy machine. This machine was meant to deliver a dosage of radiation to patients to treat illnesses like cancer. However, there were a number of software related issues including an arithmetic overflow that caused certain safety checks to be bypassed \cite{therac}. The result of these errors resulted in radiation doses that exceeded 100 times the intended amount in a smaller area. Patients developed radiation burns and three individuals lost their lives.
 
