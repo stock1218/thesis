@@ -1,38 +1,55 @@
 [===] DEBUG MATCHER
 
-[stderr] Error while trying to load a compilation database:
+[stderr] Error while trying to load a compilation database:
 
-[stderr] Could not auto-detect compilation database for file "..\..\Monocypher\src\."
 
-[stderr] No compilation database found in C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src or any parent directory
+[stderr] Could not auto-detect compilation database for file "..\..\Monocypher\src\."
 
-[stderr] fixed-compilation-database: Error while opening fixed database: no such file or directory
 
-[stderr] json-compilation-database: Error while opening JSON database: no such file or directory
+[stderr] No compilation database found in C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src or any parent directory
 
-[stderr] Running without flags.
 
-[stderr] [1/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\..
+[stderr] fixed-compilation-database: Error while opening fixed database: no such file or directory
 
-[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\..
 
-[stderr] [2/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\...
+[stderr] json-compilation-database: Error while opening JSON database: no such file or directory
 
-[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\...
 
-[stderr] [3/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\monocypher.c.
+[stderr] Running without flags.
 
-[stderr] 2243 warnings and 2 errors generated.
 
-[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\monocypher.c.
+[stderr] [1/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\..
 
-[stderr] [4/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\monocypher.h.
 
-[stderr] 2243 warnings and 2 errors generated.
+[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\..
 
-[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\monocypher.h.
 
-[stderr] [5/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\optional.
+[stderr] [2/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\...
+
+
+[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\...
+
+
+[stderr] [3/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\monocypher.c.
+
+
+[stderr] 2243 warnings and 2 errors generated.
+
+
+[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\monocypher.c.
+
+
+[stderr] [4/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\monocypher.h.
+
+
+[stderr] 2243 warnings and 2 errors generated.
+
+
+[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\monocypher.h.
+
+
+[stderr] [5/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\optional.
+
 
 [stdout] error: unable to handle compilation, expected exactly one compiler job in '' [clang-diagnostic-error]
 C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\monocypher.c:89:10: warning: Potential checked operation (non-assignment operation) [modernize-use-checked-arithmetic-debug]
@@ -2352,45 +2369,65 @@ C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\
  2924 |                 COPY(ctx->key, auth_key + 32, 32);
       |                                ^
 
-[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\optional.
-Suppressed 3 warnings (3 with check filters).
-Found compiler error(s).
+[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\optional.
+
+Suppressed 3 warnings (3 with check filters).
+
+Found compiler error(s).
+
 
 [===] TYPED DEBUG MATCHER
 
-[stderr] Error while trying to load a compilation database:
+[stderr] Error while trying to load a compilation database:
 
-[stderr] Could not auto-detect compilation database for file "..\..\Monocypher\src\."
 
-[stderr] No compilation database found in C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src or any parent directory
+[stderr] Could not auto-detect compilation database for file "..\..\Monocypher\src\."
 
-[stderr] fixed-compilation-database: Error while opening fixed database: no such file or directory
 
-[stderr] json-compilation-database: Error while opening JSON database: no such file or directory
+[stderr] No compilation database found in C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src or any parent directory
 
-[stderr] Running without flags.
 
-[stderr] [1/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\..
+[stderr] fixed-compilation-database: Error while opening fixed database: no such file or directory
 
-[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\..
 
-[stderr] [2/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\...
+[stderr] json-compilation-database: Error while opening JSON database: no such file or directory
 
-[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\...
 
-[stderr] [3/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\monocypher.c.
+[stderr] Running without flags.
 
-[stderr] 3461 warnings and 2 errors generated.
 
-[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\monocypher.c.
+[stderr] [1/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\..
 
-[stderr] [4/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\monocypher.h.
 
-[stderr] 3461 warnings and 2 errors generated.
+[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\..
 
-[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\monocypher.h.
 
-[stderr] [5/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\optional.
+[stderr] [2/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\...
+
+
+[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\...
+
+
+[stderr] [3/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\monocypher.c.
+
+
+[stderr] 3461 warnings and 2 errors generated.
+
+
+[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\monocypher.c.
+
+
+[stderr] [4/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\monocypher.h.
+
+
+[stderr] 3461 warnings and 2 errors generated.
+
+
+[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\monocypher.h.
+
+
+[stderr] [5/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\optional.
+
 
 [stdout] error: unable to handle compilation, expected exactly one compiler job in '' [clang-diagnostic-error]
 C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\monocypher.c:89:10: warning: Potential checked operation (non-assignment operation) [modernize-use-checked-arithmetic-typed-debug]
@@ -4425,45 +4462,65 @@ C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\
    65 | #define COPY(dst, src, size)       FOR(_i_, 0, size) (dst)[_i_] = (src)[_i_]
       |                                        ^
 
-[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\optional.
-Suppressed 3 warnings (3 with check filters).
-Found compiler error(s).
+[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\optional.
+
+Suppressed 3 warnings (3 with check filters).
+
+Found compiler error(s).
+
 
 [===] REAL MATCHER
 
-[stderr] Error while trying to load a compilation database:
+[stderr] Error while trying to load a compilation database:
 
-[stderr] Could not auto-detect compilation database for file "..\..\Monocypher\src\."
 
-[stderr] No compilation database found in C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src or any parent directory
+[stderr] Could not auto-detect compilation database for file "..\..\Monocypher\src\."
 
-[stderr] fixed-compilation-database: Error while opening fixed database: no such file or directory
 
-[stderr] json-compilation-database: Error while opening JSON database: no such file or directory
+[stderr] No compilation database found in C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src or any parent directory
 
-[stderr] Running without flags.
 
-[stderr] [1/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\..
+[stderr] fixed-compilation-database: Error while opening fixed database: no such file or directory
 
-[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\..
 
-[stderr] [2/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\...
+[stderr] json-compilation-database: Error while opening JSON database: no such file or directory
 
-[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\...
 
-[stderr] [3/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\monocypher.c.
+[stderr] Running without flags.
 
-[stderr] 3461 warnings and 2 errors generated.
 
-[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\monocypher.c.
+[stderr] [1/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\..
 
-[stderr] [4/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\monocypher.h.
 
-[stderr] 3461 warnings and 2 errors generated.
+[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\..
 
-[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\monocypher.h.
 
-[stderr] [5/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\optional.
+[stderr] [2/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\...
+
+
+[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\...
+
+
+[stderr] [3/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\monocypher.c.
+
+
+[stderr] 3461 warnings and 2 errors generated.
+
+
+[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\monocypher.c.
+
+
+[stderr] [4/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\monocypher.h.
+
+
+[stderr] 3461 warnings and 2 errors generated.
+
+
+[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\monocypher.h.
+
+
+[stderr] [5/5] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\optional.
+
 
 [stdout] error: unable to handle compilation, expected exactly one compiler job in '' [clang-diagnostic-error]
 C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\monocypher.c:89:10: warning: non-assignment operation can be rewritten to use checked arithmetic [modernize-use-checked-arithmetic]
@@ -6956,9 +7013,12 @@ C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\
    65 | #define COPY(dst, src, size)       FOR(_i_, 0, size) (dst)[_i_] = (src)[_i_]
       |                                        ^
 
-[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\optional.
-Suppressed 3 warnings (3 with check filters).
-Found compiler error(s).
+[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\Monocypher\src\optional.
+
+Suppressed 3 warnings (3 with check filters).
+
+Found compiler error(s).
+
 
 [===] 
     Debug plugin stats:

@@ -1,16 +1,22 @@
 [===] DEBUG MATCHER
 
-[stderr] Error while trying to load a compilation database:
+[stderr] Error while trying to load a compilation database:
 
-[stderr] Could not auto-detect compilation database for file "..\..\str\str.c"
 
-[stderr] No compilation database found in C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str or any parent directory
+[stderr] Could not auto-detect compilation database for file "..\..\str\str.c"
 
-[stderr] fixed-compilation-database: Error while opening fixed database: no such file or directory
 
-[stderr] json-compilation-database: Error while opening JSON database: no such file or directory
+[stderr] No compilation database found in C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str or any parent directory
 
-[stderr] Running without flags.
+
+[stderr] fixed-compilation-database: Error while opening fixed database: no such file or directory
+
+
+[stderr] json-compilation-database: Error while opening JSON database: no such file or directory
+
+
+[stderr] Running without flags.
+
 
 [stderr] 
 [stderr] 
@@ -19326,31 +19332,44 @@
 [stderr] 
 [===] DEBUG MATCHER
 
-[stderr] Error while trying to load a compilation database:
+[stderr] Error while trying to load a compilation database:
 
-[stderr] Could not auto-detect compilation database for file "..\..\str\str-mod.c"
 
-[stderr] No compilation database found in C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str or any parent directory
+[stderr] Could not auto-detect compilation database for file "..\..\str\str-mod.c"
 
-[stderr] fixed-compilation-database: Error while opening fixed database: no such file or directory
 
-[stderr] json-compilation-database: Error while opening JSON database: no such file or directory
+[stderr] No compilation database found in C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str or any parent directory
 
-[stderr] Running without flags.
 
-[stderr] [1/3] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str-mod.c.
+[stderr] fixed-compilation-database: Error while opening fixed database: no such file or directory
 
-[stderr] 46 warnings and 1 error generated.
 
-[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str-mod.c.
+[stderr] json-compilation-database: Error while opening JSON database: no such file or directory
 
-[stderr] [2/3] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str.c.
 
-[stderr] 109 warnings and 2 errors generated.
+[stderr] Running without flags.
 
-[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str.c.
 
-[stderr] [3/3] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str_test.c.
+[stderr] [1/3] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str-mod.c.
+
+
+[stderr] 46 warnings and 1 error generated.
+
+
+[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str-mod.c.
+
+
+[stderr] [2/3] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str.c.
+
+
+[stderr] 109 warnings and 2 errors generated.
+
+
+[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str.c.
+
+
+[stderr] [3/3] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str_test.c.
+
 
 [stdout] C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str-mod.c:47:10: error: 'sys/uio.h' file not found [clang-diagnostic-error]
    47 | #include <sys/uio.h>
@@ -21006,39 +21025,57 @@ C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str.h:1
   192 | #define str_lit(s)      ((str){ "" s, str_ref_info(sizeof(s) - 1) })
       |                                                    ^
 
-[stderr] 1150 warnings and 3 errors generated.
-Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str_test.c.
-Suppressed 3 warnings (3 in non-user code).
-Use -header-filter=.* to display errors from all non-system headers. Use -system-headers to display errors from system headers as well.
-Found compiler error(s).
+[stderr] 1150 warnings and 3 errors generated.
+
+Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str_test.c.
+
+Suppressed 3 warnings (3 in non-user code).
+
+Use -header-filter=.* to display errors from all non-system headers. Use -system-headers to display errors from system headers as well.
+
+Found compiler error(s).
+
 
 [===] TYPED DEBUG MATCHER
 
-[stderr] Error while trying to load a compilation database:
+[stderr] Error while trying to load a compilation database:
 
-[stderr] Could not auto-detect compilation database for file "..\..\str\str-mod.c"
 
-[stderr] No compilation database found in C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str or any parent directory
+[stderr] Could not auto-detect compilation database for file "..\..\str\str-mod.c"
 
-[stderr] fixed-compilation-database: Error while opening fixed database: no such file or directory
 
-[stderr] json-compilation-database: Error while opening JSON database: no such file or directory
+[stderr] No compilation database found in C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str or any parent directory
 
-[stderr] Running without flags.
 
-[stderr] [1/3] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str-mod.c.
+[stderr] fixed-compilation-database: Error while opening fixed database: no such file or directory
 
-[stderr] 6 warnings and 1 error generated.
 
-[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str-mod.c.
+[stderr] json-compilation-database: Error while opening JSON database: no such file or directory
 
-[stderr] [2/3] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str.c.
 
-[stderr] 33 warnings and 2 errors generated.
+[stderr] Running without flags.
 
-[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str.c.
 
-[stderr] [3/3] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str_test.c.
+[stderr] [1/3] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str-mod.c.
+
+
+[stderr] 6 warnings and 1 error generated.
+
+
+[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str-mod.c.
+
+
+[stderr] [2/3] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str.c.
+
+
+[stderr] 33 warnings and 2 errors generated.
+
+
+[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str.c.
+
+
+[stderr] [3/3] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str_test.c.
+
 
 [stdout] C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str-mod.c:47:10: error: 'sys/uio.h' file not found [clang-diagnostic-error]
    47 | #include <sys/uio.h>
@@ -22454,37 +22491,53 @@ C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str.h:1
   192 | #define str_lit(s)      ((str){ "" s, str_ref_info(sizeof(s) - 1) })
       |                                                    ^
 
-[stderr] 2097 warnings and 3 errors generated.
-Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str_test.c.
-Found compiler error(s).
+[stderr] 2097 warnings and 3 errors generated.
+
+Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str_test.c.
+
+Found compiler error(s).
+
 
 [===] REAL MATCHER
 
-[stderr] Error while trying to load a compilation database:
+[stderr] Error while trying to load a compilation database:
 
-[stderr] Could not auto-detect compilation database for file "..\..\str\str-mod.c"
 
-[stderr] No compilation database found in C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str or any parent directory
+[stderr] Could not auto-detect compilation database for file "..\..\str\str-mod.c"
 
-[stderr] fixed-compilation-database: Error while opening fixed database: no such file or directory
 
-[stderr] json-compilation-database: Error while opening JSON database: no such file or directory
+[stderr] No compilation database found in C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str or any parent directory
 
-[stderr] Running without flags.
 
-[stderr] [1/3] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str-mod.c.
+[stderr] fixed-compilation-database: Error while opening fixed database: no such file or directory
 
-[stderr] 6 warnings and 1 error generated.
 
-[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str-mod.c.
+[stderr] json-compilation-database: Error while opening JSON database: no such file or directory
 
-[stderr] [2/3] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str.c.
 
-[stderr] 33 warnings and 2 errors generated.
+[stderr] Running without flags.
 
-[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str.c.
 
-[stderr] [3/3] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str_test.c.
+[stderr] [1/3] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str-mod.c.
+
+
+[stderr] 6 warnings and 1 error generated.
+
+
+[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str-mod.c.
+
+
+[stderr] [2/3] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str.c.
+
+
+[stderr] 33 warnings and 2 errors generated.
+
+
+[stderr] Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str.c.
+
+
+[stderr] [3/3] Processing file C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str_test.c.
+
 
 [stdout] C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str-mod.c:47:10: error: 'sys/uio.h' file not found [clang-diagnostic-error]
    47 | #include <sys/uio.h>
@@ -23929,9 +23982,12 @@ C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str.h:1
   192 | #define str_lit(s)      ((str){ "" s, str_ref_info(sizeof(s) - 1) })
       |                                                    ^
 
-[stderr] 2097 warnings and 3 errors generated.
-Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str_test.c.
-Found compiler error(s).
+[stderr] 2097 warnings and 3 errors generated.
+
+Error while processing C:\Users\John\Projects\CMU\Thesis\checked_rewriter_plugin\test\..\..\str\str_test.c.
+
+Found compiler error(s).
+
 
 [===] 
     Debug plugin stats:
